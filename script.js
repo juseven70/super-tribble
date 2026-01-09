@@ -130,16 +130,20 @@ const fakeCursor = document.getElementById("fake-cursor");
 function updateCursorPosition() {
   const afterText = getText().slice(cursor);
 
-  const span = document.createElement("span");
-  span.style.position = "absolute";
-  span.style.visibility = "hidden";
-  span.style.whiteSpace = "pre";
-  span.style.font = getComputedStyle(display).font;
-  span.textContent = afterText || " ";
+  let afterWidth = 0;
 
-  document.body.appendChild(span);
-  const afterWidth = span.getBoundingClientRect().width;
-  document.body.removeChild(span);
+  if (afterText.length > 0) {
+    const span = document.createElement("span");
+    span.style.position = "absolute";
+    span.style.visibility = "hidden";
+    span.style.whiteSpace = "pre";
+    span.style.font = getComputedStyle(display).font;
+    span.textContent = afterText;
+
+    document.body.appendChild(span);
+    afterWidth = span.getBoundingClientRect().width;
+    document.body.removeChild(span);
+  }
 
   const displayStyle = getComputedStyle(display);
   const paddingRight = parseFloat(displayStyle.paddingRight);
