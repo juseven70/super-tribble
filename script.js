@@ -14,9 +14,6 @@ function insert(value) {
 
 let cursor = 0;
 
-  display.value += op;
-}
-
 function appendDot() {
   const text = getText();
   const left = text.slice(0, cursor);
