@@ -1,3 +1,6 @@
+function getText() {
+  return display.value.replace("|", "");
+}
 const display = document.getElementById("display");
 const history = document.getElementById("history");
 
@@ -8,6 +11,8 @@ function insert(value) {
   cursor++;
   render();
 }
+
+let cursor = 0;
 
 function operator(op) {
  if (display.value === "") return;
@@ -27,40 +32,80 @@ function operator(op) {
 }
 
 function appendDot() {
-  // 最後の数字に . がなければOK
-  const parts = display.value.split(/[+\-*/]/);
-  if (parts[parts.length - 1].includes(".")) return;
+  const text = getText();
+  const left = text.slice(0, cursor);
+  const right = text.slice(cursor);
 
-  if (display.value === "" || /[+\-*/]$/.test(display.value)) {
-    display.value += "0.";
-  } else {
-    display.value += ".";
-  }
+  const parts = left.split(/[+\-*/]/);
+  const last = parts[parts.length - 1];
+
+  if (last.includes(".")) return;
+
+  const value =
+    last === "" ? "0." : ".";
+
+  display.value = left + value + right;
+  cursor += value.length;
+  render();
 }
 
-function percent() {
-  const parts = display.value.split(/[+\-*/]/);
-  const last = parts.pop();
-  if (last === "") return;
+function operator(op) {
+  const text = getText();
+  const left = text.slice(0, cursor);
+  const right = text.slice(cursor);
 
-  const result = Number(last) / 100;
+  if (left === "" && op !== "-") return;
+  if (/[+\-*/]$/.test(left)) {
+    display.value = left.slice(0, -1) + op + right;
+  } else {
+    display.value = left + op + right;
+  }
+
+  cursor++;
+  render();
+}
+function percent() {
+  const text = getText();
+  const left = text.slice(0, cursor);
+  const right = text.slice(cursor);
+
+  const match = left.match(/(\d+\.?\d*)$/);
+  if (!match) return;
+
+  const num = match[1];
+  const result = Number(num) / 100;
+
   display.value =
-    parts.join("") + (parts.length ? "" : "") + result;
+    left.slice(0, -num.length) +
+    result +
+    right;
+
+  cursor =
+    left.length - num.length + String(result).length;
+
+  render();
 }
 
 function deleteOne() {
-  display.value = display.value.slice(0, -1);
+  if (cursor === 0) return;
+
+  const text = getText();
+  display.value =
+    text.slice(0, cursor - 1) + text.slice(cursor);
+  cursor--;
+  render();
 }
 
 function clearAll() {
   display.value = "";
+  cursor = 0;
   history.textContent = "";
+  render();
 }
 
 function calculate() {
-  let expression = display.value;
+  let expression = getText();
 
-  // 最後が記号なら削除
   if (/[+\-*/]$/.test(expression)) {
     expression = expression.slice(0, -1);
   }
@@ -68,17 +113,18 @@ function calculate() {
   try {
     const result = eval(expression);
 
-    // 履歴に「式 = 結果」
-    history.textContent += `${expression} = ${result}\n`;
+    history.textContent +=
+      `${expression} = ${result}\n`;
 
-    // 表示は結果だけ
-    display.value = result;
+    display.value = String(result);
+    cursor = display.value.length;
+    render();
   } catch {
     display.value = "Error";
+    cursor = 0;
+    render();
   }
 }
-
-let cursor = 0;
 
 function render() {
   const text = display.value;
@@ -94,12 +140,4 @@ function moveRight() {
   if (cursor < display.value.replace("|", "").length) cursor++;
   render();
 }
-function deleteOne() {
-  if (cursor === 0) return;
 
-  const text = display.value.replace("|", "");
-  display.value =
-    text.slice(0, cursor - 1) + text.slice(cursor);
-  cursor--;
-  render();
-}
