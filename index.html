@@ -2,7 +2,9 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TeX電卓</title>
+
   <!-- MathJax -->
   <script>
     window.MathJax = {
@@ -11,20 +13,23 @@
     };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" defer></script>
+
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="calculator">
+  <!-- 左側：計算履歴 -->
   <div id="history"></div>
 
+  <!-- 右側：メイン操作 -->
   <div class="right">
     <div class="display-wrapper">
       <div id="display"></div>
     </div>
 
     <div class="buttons">
-      <!-- 1行目 -->
+      <!-- 1行目：クリア、移動、削除 -->
       <button onclick="clearAll()" class="btn-sub">C</button>
       <button onclick="moveCursor('left')" class="btn-sub">←</button>
       <button onclick="moveCursor('right')" class="btn-sub">→</button>
@@ -53,7 +58,7 @@
       <button onclick="appendDot()">.</button>
       <button onclick="operator('+')" class="btn-op">+</button>
       
-      <!-- 6行目（横いっぱい） -->
+      <!-- 6行目：計算実行 -->
       <button class="equal" onclick="calculate()">＝</button>
     </div>
   </div>
