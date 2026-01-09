@@ -5,19 +5,20 @@ let expression = "";
 
 // ===== 表示 =====
 function renderDisplay() {
-  if (!expression) {
-    display.innerHTML = "";
-    return;
-  }
+  display.innerHTML = "";
+
+  if (!expression) return;
 
   const tex = expression
     .replace(/\*/g, "\\times ")
     .replace(/\//g, "\\div ");
 
-  display.innerHTML = `$${tex}$`;
+  const span = document.createElement("span");
+  span.textContent = `$${tex}$`;
+  display.appendChild(span);
 
-  if (window.MathJax && MathJax.typesetPromise) {
-    MathJax.typesetPromise([display]);
+  if (window.MathJax) {
+    MathJax.typesetPromise([span]);
   }
 }
 // ===== 入力 =====
