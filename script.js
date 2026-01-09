@@ -27,3 +27,16 @@ function calculate() {
   display.value = eval(expression);
   history.textContent = "";
 }
+function appendDot() {
+  if (display.value.includes(".")) return;
+  if (display.value === "") {
+    display.value = "0.";
+  } else {
+    display.value += ".";
+  }
+}
+
+function percent() {
+  if (display.value === "") return;
+  display.value = String(Number(display.value) / 100);
+}
