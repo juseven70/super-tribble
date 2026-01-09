@@ -11,7 +11,8 @@ body {
   grid-template-columns: 180px 1fr;
   min-height: 520px;
   height: auto;
-
+  width: 520px;    
+  max-width: 95vw; 
   align-items: stretch;
 
   gap: 12px;
