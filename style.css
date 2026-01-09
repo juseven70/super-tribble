@@ -41,3 +41,12 @@ button {
   margin-bottom: 4px;
   white-space: pre-line;
 }
+
+#display {
+  font-family: monospace;
+}
+
+.cursor {
+  color: blue;
+  font-weight: bold;
+}
