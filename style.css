@@ -132,3 +132,31 @@ button[onclick="calculate()"] {
   display: inline-flex;
   align-items: center;
 }
+
+/* style.css の修正・追加 */
+
+/* 1行目の移動ボタンなどの色を変えるとおしゃれです */
+button[onclick^="moveCursor"] {
+  background: #d1d1d6;
+  color: #000;
+  font-weight: bold;
+}
+
+/* ＝ボタンを目立たせる例 */
+.equal {
+  grid-column: span 4; /* 一番下に横長に配置 */
+  background: #007aff !important;
+  color: #fff !important;
+  border-radius: 12px;
+  height: 50px; /* 少し低めにするなど調整 */
+  margin-top: 8px;
+}
+
+/* ボタンエリア全体の調整（5行から6行になる場合など） */
+.buttons {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(5, 1fr) auto; /* 最後に＝の行を追加 */
+  gap: 10px;
+}
