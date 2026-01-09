@@ -1,118 +1,78 @@
-// ===== 要素取得 =====
 const display = document.getElementById("display");
 const history = document.getElementById("history");
 
-// ===== 基本ユーティリティ =====
-function getText() {
-  return display.textContent;
+let expression = "";
+
+// ===== 表示 =====
+function renderDisplay() {
+  if (!expression) {
+    display.innerHTML = "";
+    return;
+  }
+
+  const tex = expression
+    .replace(/\*/g, "\\times ")
+    .replace(/\//g, "\\div ");
+
+  display.innerHTML = `$${tex}$`;
+  MathJax.typesetPromise([display]);
 }
 
-function setText(text) {
-  display.textContent = text;
-  placeCursorToEnd();
-}
-
-function placeCursorToEnd() {
-  const range = document.createRange();
-  const sel = window.getSelection();
-  range.selectNodeContents(display);
-  range.collapse(false);
-  sel.removeAllRanges();
-  sel.addRange(range);
-}
-
-// ===== 入力系 =====
+// ===== 入力 =====
 function insert(value) {
-  display.focus();
-  document.execCommand("insertText", false, value);
+  expression += value;
+  renderDisplay();
 }
 
 function deleteOne() {
-  display.focus();
-  document.execCommand("delete");
+  expression = expression.slice(0, -1);
+  renderDisplay();
 }
 
 function clearAll() {
-  setText("");
+  expression = "";
   history.textContent = "";
-}
-
-// ===== カーソル移動 =====
-function moveLeft() {
-  display.focus();
-  const sel = window.getSelection();
-  if (!sel.rangeCount) return;
-
-  const range = sel.getRangeAt(0);
-  if (range.startOffset === 0) return;
-
-  range.setStart(range.startContainer, range.startOffset - 1);
-  range.collapse(true);
-  sel.removeAllRanges();
-  sel.addRange(range);
-}
-
-function moveRight() {
-  display.focus();
-  const sel = window.getSelection();
-  if (!sel.rangeCount) return;
-
-  const range = sel.getRangeAt(0);
-  const len = display.textContent.length;
-  if (range.startOffset >= len) return;
-
-  range.setStart(range.startContainer, range.startOffset + 1);
-  range.collapse(true);
-  sel.removeAllRanges();
-  sel.addRange(range);
+  renderDisplay();
 }
 
 // ===== 演算子 =====
 function operator(op) {
-  const text = getText();
-  if (!text && op !== "-") return;
+  if (!expression && op !== "-") return;
 
-  if (/[+\-*/]$/.test(text)) {
-    setText(text.slice(0, -1) + op);
+  if (/[+\-*/]$/.test(expression)) {
+    expression = expression.slice(0, -1) + op;
   } else {
-    insert(op);
+    expression += op;
   }
+  renderDisplay();
 }
 
 // ===== 小数点 =====
 function appendDot() {
-  const text = getText();
-  const parts = text.split(/[+\-*/]/);
+  const parts = expression.split(/[+\-*/]/);
   const last = parts[parts.length - 1];
-
   if (last.includes(".")) return;
 
-  if (last === "") {
-    insert("0.");
-  } else {
-    insert(".");
-  }
+  expression += last === "" ? "0." : ".";
+  renderDisplay();
 }
 
 // ===== パーセント =====
 function percent() {
-  const text = getText();
-  const match = text.match(/(\d+\.?\d*)$/);
+  const match = expression.match(/(\d+\.?\d*)$/);
   if (!match) return;
 
   const num = match[1];
   const result = Number(num) / 100;
+  expression =
+    expression.slice(0, -num.length) + result;
 
-  setText(
-    text.slice(0, -num.length) + result
-  );
+  renderDisplay();
 }
 
 // ===== 計算 =====
 function calculate() {
-  let expr = getText();
-  if (!expr) return;
-
+  let expr = expression;
   if (/[+\-*/]$/.test(expr)) {
     expr = expr.slice(0, -1);
   }
@@ -120,12 +80,10 @@ function calculate() {
   try {
     const result = eval(expr);
     history.textContent += `${expr} = ${result}\n`;
-    setText(String(result));
+    expression = String(result);
+    renderDisplay();
   } catch {
-    setText("Error");
+    expression = "Error";
+    renderDisplay();
   }
 }
-
-// ===== 初期フォーカス =====
-display.focus();
-placeCursorToEnd();
