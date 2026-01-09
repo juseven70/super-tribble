@@ -1,3 +1,5 @@
+let cursorVisible = true;
+
 function getText() {
   return display.value.replace("|", "");
 }
@@ -112,8 +114,13 @@ function calculate() {
 
 function render() {
   const text = getText();
-  display.value =
-    text.slice(0, cursor) + "|" + text.slice(cursor);
+
+  if (cursorVisible) {
+    display.value =
+      text.slice(0, cursor) + "|" + text.slice(cursor);
+  } else {
+    display.value = text;
+  }
 }
 
 function moveLeft() {
@@ -125,6 +132,11 @@ function moveRight() {
   if (cursor < display.value.replace("|", "").length) cursor++;
   render();
 }
+
+setInterval(() => {
+  cursorVisible = !cursorVisible;
+  render();
+}, 500);
 
 render();
 
