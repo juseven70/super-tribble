@@ -40,12 +40,31 @@ function clearAll() {
 // ===== カーソル移動 =====
 function moveLeft() {
   display.focus();
-  document.execCommand("moveLeft");
+  const sel = window.getSelection();
+  if (!sel.rangeCount) return;
+
+  const range = sel.getRangeAt(0);
+  if (range.startOffset === 0) return;
+
+  range.setStart(range.startContainer, range.startOffset - 1);
+  range.collapse(true);
+  sel.removeAllRanges();
+  sel.addRange(range);
 }
 
 function moveRight() {
   display.focus();
-  document.execCommand("moveRight");
+  const sel = window.getSelection();
+  if (!sel.rangeCount) return;
+
+  const range = sel.getRangeAt(0);
+  const len = display.textContent.length;
+  if (range.startOffset >= len) return;
+
+  range.setStart(range.startContainer, range.startOffset + 1);
+  range.collapse(true);
+  sel.removeAllRanges();
+  sel.addRange(range);
 }
 
 // ===== 演算子 =====
