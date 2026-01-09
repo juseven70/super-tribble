@@ -124,3 +124,5 @@ function moveRight() {
   render();
 }
 
+render();
+
