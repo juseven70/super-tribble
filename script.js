@@ -140,3 +140,22 @@ document.addEventListener("keydown", (e) => {
 
 // 初期表示
 renderDisplay();
+
+// script.js に追加
+
+/**
+ * カーソル位置を左右に移動させる
+ * @param {string} direction - 'left' または 'right'
+ */
+function moveCursor(direction) {
+  if (direction === 'left') {
+    if (cursorIndex > 0) {
+      cursorIndex--;
+    }
+  } else if (direction === 'right') {
+    if (cursorIndex < expression.length) {
+      cursorIndex++;
+    }
+  }
+  renderDisplay(); // 再描画してカーソル位置を反映
+}
