@@ -144,7 +144,6 @@ function updateCursorPosition() {
   const paddingRight =
     parseFloat(getComputedStyle(display).paddingRight);
 
-  // 右寄せなので right 基準が正解
   let right = paddingRight + afterWidth;
 
   const minRight = paddingRight;
