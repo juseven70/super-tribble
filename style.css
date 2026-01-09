@@ -46,23 +46,22 @@ button {
   white-space: pre-line;
 }
 
-.cursor {
-}
-
 .display-wrapper {
   position: relative;
+  width: 100%;
 }
 
 #fake-cursor {
   position: absolute;
-  top: 8px;
-  right: 10px; 
+  top: 50%;
+  transform: translateY(-50%);
+  right: 10px;
   width: 2px;
   height: 24px;
   background: black;
-  z-index: 10;           
+  z-index: 10;
   animation: blink 1s step-start infinite;
-  pointer-events: none; 
+  pointer-events: none;
 }
 
 @keyframes blink {
