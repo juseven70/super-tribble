@@ -20,6 +20,8 @@ body {
   margin-bottom: 10px;
   background: #fff;
   color: #000;
+  box-sizing: border-box;
+  caret-color: transparent;
 }
 
 .buttons {
