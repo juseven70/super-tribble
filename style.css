@@ -1,9 +1,14 @@
 body {
+  margin: 0;
+  width: 100vw;
+  height: 100vh;
+
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+
   font-family: sans-serif;
+  background: #000;
 }
 
 .calculator {
