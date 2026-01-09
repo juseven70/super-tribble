@@ -1,4 +1,21 @@
-<div class="buttons">
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>電卓</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="calculator">
+  <div id="history"></div>
+  <input type="text" id="display" disabled>
+  <div class="cursor-buttons">
+  <button onclick="moveLeft()">◀</button>
+  <button onclick="moveRight()">▶</button>
+</div>
+
+  <div class="buttons">
   <!-- 1行目 -->
   <button onclick="clearAll()">C</button>
   <button onclick="percent()">%</button>
