@@ -2,7 +2,17 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>電卓</title>
+  <title>TeX電卓</title>
+
+  <!-- MathJax -->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,47 +22,37 @@
 
   <div class="right">
     <div class="display-wrapper">
-  <div id="display" contenteditable="true"></div>
-</div>
-
-    <div class="cursor-buttons">
-      <button onclick="moveLeft()">◀</button>
-      <button onclick="moveRight()">▶</button>
+      <div id="display"></div>
     </div>
 
     <div class="buttons">
-    <!-- 1行目 -->
-    <button onclick="clearAll()">C</button>
-    <button onclick="percent()">%</button>
-    <button onclick="deleteOne()">⌫</button>
-    <button onclick="operator('+')">+</button>
+      <button onclick="clearAll()">C</button>
+      <button onclick="percent()">%</button>
+      <button onclick="deleteOne()">⌫</button>
+      <button onclick="operator('+')">+</button>
 
-    <!-- 2行目 -->
-    <button onclick="insert('7')">7</button>
-    <button onclick="insert('8')">8</button>
-    <button onclick="insert('9')">9</button>
-    <button onclick="operator('-')">−</button>
+      <button onclick="insert('7')">7</button>
+      <button onclick="insert('8')">8</button>
+      <button onclick="insert('9')">9</button>
+      <button onclick="operator('-')">−</button>
 
-    <!-- 3行目 -->
-    <button onclick="insert('4')">4</button>
-    <button onclick="insert('5')">5</button>
-    <button onclick="insert('6')">6</button>
-    <button onclick="operator('*')">×</button>
+      <button onclick="insert('4')">4</button>
+      <button onclick="insert('5')">5</button>
+      <button onclick="insert('6')">6</button>
+      <button onclick="operator('*')">×</button>
 
-    <!-- 4行目 -->
-    <button onclick="insert('1')">1</button>
-    <button onclick="insert('2')">2</button>
-    <button onclick="insert('3')">3</button>
-    <button onclick="operator('/')">÷</button>
+      <button onclick="insert('1')">1</button>
+      <button onclick="insert('2')">2</button>
+      <button onclick="insert('3')">3</button>
+      <button onclick="operator('/')">÷</button>
 
-    <!-- 5行目 -->
-    <button class="zero" onclick="insert('0')">0</button>
-    <button onclick="appendDot()">.</button>
-    <button onclick="calculate()">＝</button>
+      <button class="zero" onclick="insert('0')">0</button>
+      <button onclick="appendDot()">.</button>
+      <button onclick="calculate()">＝</button>
     </div>
   </div>
 </div>
 
-  <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
