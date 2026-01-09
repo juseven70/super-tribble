@@ -1,110 +1,109 @@
+/* 全体レイアウトの微調整 */
 body {
   margin: 0;
   width: 100vw;
-  height: 100dvh;      
-  min-height: 100vh; 
-
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-
-  font-family: sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background: #000;
 }
 
 .calculator {
   display: grid;
-  grid-template-columns: 22% 1fr;
-
-  width: 100%;
-  height: 100%;
-
+  grid-template-columns: 260px 1fr; /* 履歴幅を固定すると安定します */
+  width: 95vw;
+  height: 90vh;
   max-width: 1200px;
-
-  gap: 16px;
-  padding: 16px;
-
+  gap: 20px;
+  padding: 20px;
   background: #f2f2f7;
-  border-radius: 0;
+  border-radius: 30px; /* 角を少し丸める */
   box-sizing: border-box;
-
-  overflow: hidden;
 }
 
 .right {
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-width: 0;
 }
 
 .display-wrapper {
   flex-shrink: 0;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 #display {
-  height: 120px;     
-  font-size: 48px;
-
+  height: 100px;
+  font-size: 40px;
   width: 100%;
   padding: 0 20px;
-  padding-right: 28px;
-
   display: flex;
   align-items: center;
   justify-content: flex-end;
-
   background: #fff;
-  border-radius: 16px;
+  border-radius: 18px;
   box-shadow: inset 0 0 0 1px #ddd;
-
-  overflow: hidden;
+  box-sizing: border-box;
 }
 
 #history {
   background: #fff;
-  border-radius: 14px;
-  padding: 12px;
-  font-size: 16px;
-  color: #000;
-
+  border-radius: 18px;
+  padding: 15px;
+  font-size: 18px;
   overflow-y: auto;
-  white-space: normal;
-
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  border: 1px solid #ddd;
 }
 
+/* ボタンエリアの修正 */
 .buttons {
-  flex: 1; 
+  flex: 1; /* 残りの高さをすべて使う */
   display: grid;
   grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(5, 1fr); /* 縦も5等分する */
   gap: 12px;
 }
 
 button {
-  height: 64px;
-  font-size: 26px;
-  border-radius: 50%;
+  width: 100%;
+  height: 100%; /* セルの高さに合わせる */
+  font-size: 24px;
+  font-weight: 500;
+  border-radius: 16px; /* 50%よりこちらの方がモダンな電卓に見えます */
   border: none;
-  background: #e5e5ea;
+  background: #ffffff;
+  color: #007aff; /* iOS風の青 */
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button:active {
+  background: #d1d1d6;
+}
+
+/* 記号ボタンの色を変える例（お好みで） */
+button[onclick*="operator"], 
+button[onclick="calculate()"] {
+  background: #007aff;
+  color: #fff;
 }
 
 .zero {
   grid-column: span 2;
 }
 
-@media (max-width: 600px) {
+/* レスポンシブ対応 */
+@media (max-width: 800px) {
   .calculator {
-    grid-template-columns: 30% 1fr;
+    grid-template-columns: 1fr; /* スマホでは1列にする */
+    grid-template-rows: 20% 1fr;
   }
-}
-
-@media (orientation: landscape) {
-  button {
-    height: 72px;
-    font-size: 28px;
+  #history {
+    display: none; /* 小さい画面では履歴を隠すか、上に配置 */
   }
 }
