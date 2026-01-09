@@ -1,61 +1,31 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>TeX電卓</title>
+<!-- index.html の .buttons の中身を以下に書き換え -->
+<div class="buttons">
+  <!-- 1行目：クリア、カーソル移動、削除 -->
+  <button onclick="clearAll()">C</button>
+  <button onclick="moveCursor('left')">←</button>
+  <button onclick="moveCursor('right')">→</button>
+  <button onclick="deleteOne()">⌫</button>
 
-  <!-- MathJax -->
-  <script>
-    window.MathJax = {
-      tex: { inlineMath: [['$', '$']] },
-      svg: { fontCache: 'global' }
-    };
-  </script>
-  <script
-  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"
-  defer>
-</script>
+  <!-- 2行目以降 -->
+  <button onclick="insert('7')">7</button>
+  <button onclick="insert('8')">8</button>
+  <button onclick="insert('9')">9</button>
+  <button onclick="operator('/')">÷</button>
 
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+  <button onclick="insert('4')">4</button>
+  <button onclick="insert('5')">5</button>
+  <button onclick="insert('6')">6</button>
+  <button onclick="operator('*')">×</button>
 
-<div class="calculator">
-  <div id="history"></div>
+  <button onclick="insert('1')">1</button>
+  <button onclick="insert('2')">2</button>
+  <button onclick="insert('3')">3</button>
+  <button onclick="operator('-')">−</button>
 
-  <div class="right">
-    <div class="display-wrapper">
-      <div id="display"></div>
-    </div>
-
-    <div class="buttons">
-      <button onclick="clearAll()">C</button>
-      <button onclick="percent()">%</button>
-      <button onclick="deleteOne()">⌫</button>
-      <button onclick="operator('+')">+</button>
-
-      <button onclick="insert('7')">7</button>
-      <button onclick="insert('8')">8</button>
-      <button onclick="insert('9')">9</button>
-      <button onclick="operator('-')">−</button>
-
-      <button onclick="insert('4')">4</button>
-      <button onclick="insert('5')">5</button>
-      <button onclick="insert('6')">6</button>
-      <button onclick="operator('*')">×</button>
-
-      <button onclick="insert('1')">1</button>
-      <button onclick="insert('2')">2</button>
-      <button onclick="insert('3')">3</button>
-      <button onclick="operator('/')">÷</button>
-
-      <button class="zero" onclick="insert('0')">0</button>
-      <button onclick="appendDot()">.</button>
-      <button onclick="calculate()">＝</button>
-    </div>
-  </div>
+  <button class="zero" onclick="insert('0')">0</button>
+  <button onclick="appendDot()">.</button>
+  <button onclick="operator('+')">+</button>
+  
+  <!-- 最後に = を配置するために grid を調整するか、スパンさせる -->
+  <button class="equal" onclick="calculate()">＝</button>
 </div>
-
-<script src="script.js"></script>
-</body>
-</html>
