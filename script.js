@@ -128,23 +128,23 @@ function moveRight() {
 const fakeCursor = document.getElementById("fake-cursor");
 
 function updateCursorPosition() {
-  const beforeText = getText().slice(0, cursor);
-  
+  const afterText = getText().slice(cursor);
+
   const span = document.createElement("span");
   span.style.position = "absolute";
   span.style.visibility = "hidden";
   span.style.whiteSpace = "pre";
   span.style.font = getComputedStyle(display).font;
-  span.textContent = beforeText || " ";
+  span.textContent = afterText || " ";
 
   document.body.appendChild(span);
-  const textWidth = span.getBoundingClientRect().width;
+  const afterWidth = span.getBoundingClientRect().width;
   document.body.removeChild(span);
 
   const style = getComputedStyle(display);
-  const paddingLeft = parseFloat(style.paddingLeft);
+  const paddingRight = parseFloat(style.paddingRight);
 
-  fakeCursor.style.left = paddingLeft + textWidth + "px";
+  fakeCursor.style.right = paddingRight + afterWidth + "px";
 }
 
 render();
