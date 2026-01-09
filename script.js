@@ -129,8 +129,24 @@ function moveRight() {
 const fakeCursor = document.getElementById("fake-cursor");
 
 function updateCursorPosition() {
-  fakeCursor.style.right =
-    `calc(${getText().length - cursor}ch + 10px)`;
+  const text = getText().slice(0, cursor);
+
+  const span = document.createElement("span");
+  span.style.position = "absolute";
+  span.style.visibility = "hidden";
+  span.style.whiteSpace = "pre";
+  span.style.font = getComputedStyle(display).font;
+  span.textContent = text || " ";
+
+  document.body.appendChild(span);
+
+  const textWidth = span.getBoundingClientRect().width;
+  document.body.removeChild(span);
+
+  const displayRect = display.getBoundingClientRect();
+
+  fakeCursor.style.left =
+    displayRect.right - textWidth - 12 + "px";
 }
 
 render();
