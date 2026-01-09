@@ -128,37 +128,32 @@ function moveRight() {
 const fakeCursor = document.getElementById("fake-cursor");
 
 function updateCursorPosition() {
-  const text = getText().slice(0, cursor);
+  const afterText = getText().slice(cursor);
 
   const span = document.createElement("span");
   span.style.position = "absolute";
   span.style.visibility = "hidden";
   span.style.whiteSpace = "pre";
   span.style.font = getComputedStyle(display).font;
-  span.textContent = text || " ";
+  span.textContent = afterText || " ";
 
   document.body.appendChild(span);
-  const textWidth = span.getBoundingClientRect().width;
+  const afterWidth = span.getBoundingClientRect().width;
   document.body.removeChild(span);
-
-  const wrapperRect = display.parentElement.getBoundingClientRect();
-  const displayRect = display.getBoundingClientRect();
 
   const paddingRight =
     parseFloat(getComputedStyle(display).paddingRight);
 
-  let left =
-    displayRect.right -
-    wrapperRect.left -
-    textWidth -
-    paddingRight;
+  // 右寄せなので right 基準が正解
+  let right = paddingRight + afterWidth;
 
-  const minLeft = 8; // 左の余白
-  const maxLeft = displayRect.width - paddingRight - 2;
+  const minRight = paddingRight;
+  const maxRight = display.clientWidth - 2;
 
-  left = Math.max(minLeft, Math.min(left, maxLeft));
+  right = Math.max(minRight, Math.min(right, maxRight));
 
-  fakeCursor.style.left = left + "px";
+  fakeCursor.style.right = right + "px";
 }
+
 render();
 
