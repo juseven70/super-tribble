@@ -52,18 +52,15 @@ button {
 
 .display-wrapper {
   position: relative;
-  width: 100%;
 }
 
 #fake-cursor {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  right: 10px;
   width: 2px;
-  height: 24px;
+  height: 1.2em;
   background: black;
-  z-index: 10;
   animation: blink 1s step-start infinite;
   pointer-events: none;
 }
