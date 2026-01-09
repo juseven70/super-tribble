@@ -9,44 +9,49 @@
 
 <div class="calculator">
   <div id="history"></div>
-  <div class="display-wrapper">
-  <input type="text" id="display" readonly>
-  <div id="fake-cursor"></div>
-</div>
-  <div class="cursor-buttons">
-  <button onclick="moveLeft()">◀</button>
-  <button onclick="moveRight()">▶</button>
-</div>
 
-  <div class="buttons">
-  <!-- 1行目 -->
-  <button onclick="clearAll()">C</button>
-  <button onclick="percent()">%</button>
-  <button onclick="deleteOne()">⌫</button>
-  <button onclick="operator('+')">+</button>
+  <div class="right">
+    <div class="display-wrapper">
+      <input type="text" id="display" readonly>
+      <div id="fake-cursor"></div>
+    </div>
 
-  <!-- 2行目 -->
-  <button onclick="insert('7')">7</button>
-  <button onclick="insert('8')">8</button>
-  <button onclick="insert('9')">9</button>
-  <button onclick="operator('-')">−</button>
+    <div class="cursor-buttons">
+      <button onclick="moveLeft()">◀</button>
+      <button onclick="moveRight()">▶</button>
+    </div>
 
-  <!-- 3行目 -->
-  <button onclick="insert('4')">4</button>
-  <button onclick="insert('5')">5</button>
-  <button onclick="insert('6')">6</button>
-  <button onclick="operator('*')">×</button>
+    <div class="buttons">
+    <!-- 1行目 -->
+    <button onclick="clearAll()">C</button>
+    <button onclick="percent()">%</button>
+    <button onclick="deleteOne()">⌫</button>
+    <button onclick="operator('+')">+</button>
 
-  <!-- 4行目 -->
-  <button onclick="insert('1')">1</button>
-  <button onclick="insert('2')">2</button>
-  <button onclick="insert('3')">3</button>
-  <button onclick="operator('/')">÷</button>
+    <!-- 2行目 -->
+    <button onclick="insert('7')">7</button>
+    <button onclick="insert('8')">8</button>
+    <button onclick="insert('9')">9</button>
+    <button onclick="operator('-')">−</button>
 
-  <!-- 5行目 -->
-  <button class="zero" onclick="insert('0')">0</button>
-  <button onclick="appendDot()">.</button>
-  <button onclick="calculate()">＝</button>
+    <!-- 3行目 -->
+    <button onclick="insert('4')">4</button>
+    <button onclick="insert('5')">5</button>
+    <button onclick="insert('6')">6</button>
+    <button onclick="operator('*')">×</button>
+
+    <!-- 4行目 -->
+    <button onclick="insert('1')">1</button>
+    <button onclick="insert('2')">2</button>
+    <button onclick="insert('3')">3</button>
+    <button onclick="operator('/')">÷</button>
+
+    <!-- 5行目 -->
+    <button class="zero" onclick="insert('0')">0</button>
+    <button onclick="appendDot()">.</button>
+    <button onclick="calculate()">＝</button>
+    </div>
+  </div>
 </div>
 
   <script src="script.js"></script>
