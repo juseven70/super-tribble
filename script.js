@@ -1,16 +1,12 @@
 function getText() {
-  return display.value;
+  return display.textContent;
 }
 
 const display = document.getElementById("display");
 const history = document.getElementById("history");
 
 function insert(value) {
-  const text = getText();
-  display.value =
-    text.slice(0, cursor) + value + text.slice(cursor);
-  cursor++;
-  render();
+  document.execCommand("insertText", false, value);
 }
 
 let cursor = 0;
@@ -73,13 +69,7 @@ function percent() {
 }
 
 function deleteOne() {
-  if (cursor === 0) return;
-
-  const text = getText();
-  display.value =
-    text.slice(0, cursor - 1) + text.slice(cursor);
-  cursor--;
-  render();
+  document.execCommand("delete");
 }
 
 function clearAll() {
@@ -116,13 +106,11 @@ function render() {
 }
 
 function moveLeft() {
-  if (cursor > 0) cursor--;
-  render();
+  document.execCommand("moveLeft");
 }
 
 function moveRight() {
-  if (cursor < getText().length) cursor++;
-  render();
+  document.execCommand("moveRight");
 }
 
 const fakeCursor = document.getElementById("fake-cursor");
