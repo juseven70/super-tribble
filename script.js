@@ -141,13 +141,16 @@ function updateCursorPosition() {
   const afterWidth = span.getBoundingClientRect().width;
   document.body.removeChild(span);
 
-  const paddingRight =
-    parseFloat(getComputedStyle(display).paddingRight);
+  const displayStyle = getComputedStyle(display);
+  const paddingRight = parseFloat(displayStyle.paddingRight);
+
+  const wrapper = display.parentElement;
+  const wrapperWidth = wrapper.clientWidth;
 
   let right = paddingRight + afterWidth;
 
   const minRight = paddingRight;
-  const maxRight = display.clientWidth - 2;
+  const maxRight = wrapperWidth - 2;
 
   right = Math.max(minRight, Math.min(right, maxRight));
 
