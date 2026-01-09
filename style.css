@@ -62,10 +62,15 @@ body {
   background: #fff;
   border-radius: 14px;
   padding: 12px;
-  font-size: 14px;
-  color: #444;
+  font-size: 16px;
+  color: #000;
+
   overflow-y: auto;
-  white-space: pre-line;
+  white-space: normal;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .buttons {
