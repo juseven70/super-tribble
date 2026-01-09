@@ -14,20 +14,6 @@ function insert(value) {
 
 let cursor = 0;
 
-function operator(op) {
- if (display.value === "") return;
-
-  // 記号が連続しないように
-  if (/[+\-*/]$/.test(display.value)) {
-    display.value = display.value.slice(0, -1);
-  }
-
-  display.value += op;
-
-  // ★計算途中では履歴を表示しない
-  history.textContent = "";
-  }
-
   display.value += op;
 }
 
@@ -55,6 +41,7 @@ function operator(op) {
   const right = text.slice(cursor);
 
   if (left === "" && op !== "-") return;
+
   if (/[+\-*/]$/.test(left)) {
     display.value = left.slice(0, -1) + op + right;
   } else {
@@ -64,6 +51,7 @@ function operator(op) {
   cursor++;
   render();
 }
+
 function percent() {
   const text = getText();
   const left = text.slice(0, cursor);
@@ -113,8 +101,7 @@ function calculate() {
   try {
     const result = eval(expression);
 
-    history.textContent +=
-      `${expression} = ${result}\n`;
+    history.textContent += `${expression} = ${result}\n`;
 
     display.value = String(result);
     cursor = display.value.length;
@@ -125,7 +112,6 @@ function calculate() {
     render();
   }
 }
-
 function render() {
   const text = display.value;
   display.value =
