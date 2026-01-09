@@ -39,18 +39,24 @@ body {
 }
 
 #display {
+  width: 100%;
   height: 90px;
-  background: #fff;
-  border-radius: 14px;
-  box-shadow: inset 0 0 0 1px #ddd;
 
   display: flex;
   align-items: center;
   justify-content: flex-end;
 
-  padding: 0 16px;
   font-size: 38px;
+  padding: 0 16px;
+
+  background: #fff;
+  color: #000;
+
+  white-space: nowrap;
   overflow: hidden;
+
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 1px #ddd;
 }
 
 .buttons {
