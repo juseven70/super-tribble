@@ -139,15 +139,22 @@ function updateCursorPosition() {
   span.textContent = text || " ";
 
   document.body.appendChild(span);
-
   const textWidth = span.getBoundingClientRect().width;
   document.body.removeChild(span);
 
+  const wrapperRect =
+    display.parentElement.getBoundingClientRect();
   const displayRect = display.getBoundingClientRect();
 
-  fakeCursor.style.left =
-    displayRect.right - textWidth - 12 + "px";
-}
+  const paddingRight =
+    parseFloat(getComputedStyle(display).paddingRight);
 
+  fakeCursor.style.left =
+    displayRect.right -
+    wrapperRect.left -
+    textWidth -
+    paddingRight +
+    "px";
+}
 render();
 
