@@ -1,8 +1,4 @@
-let cursorVisible = true;
 
-function getText() {
-  return display.value.replace(/\|/g, "");
-}
 const display = document.getElementById("display");
 const history = document.getElementById("history");
 
