@@ -70,3 +70,7 @@ button {
 @keyframes blink {
   50% { opacity: 0; }
 }
+
+#fake-cursor {
+  pointer-events: none;
+}
