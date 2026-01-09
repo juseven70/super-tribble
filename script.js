@@ -12,15 +12,16 @@ function toTeX(expr) {
 
 /* ===== ディスプレイ表示 ===== */
 function renderDisplay() {
-  if (!expression) {
-    display.innerHTML = "";
-    return;
-  }
+  display.innerHTML = "";
 
-  display.innerHTML = `$${toTeX(expression)}$`;
+  if (!expression) return;
+
+  const span = document.createElement("span");
+  span.textContent = `$${toTeX(expression)}$`;
+  display.appendChild(span);
 
   if (window.MathJax) {
-    MathJax.typesetPromise([display]);
+    MathJax.typesetPromise([span]);
   }
 }
 
