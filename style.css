@@ -1,4 +1,3 @@
-/* 全体レイアウトの微調整 */
 body {
   margin: 0;
   width: 100vw;
@@ -6,20 +5,20 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: sans-serif;
   background: #000;
 }
 
 .calculator {
   display: grid;
-  grid-template-columns: 260px 1fr; /* 履歴幅を固定すると安定します */
+  grid-template-columns: 260px 1fr;
   width: 95vw;
   height: 90vh;
-  max-width: 1200px;
-  gap: 20px;
-  padding: 20px;
+  max-width: 1000px;
+  gap: 16px;
+  padding: 16px;
   background: #f2f2f7;
-  border-radius: 30px; /* 角を少し丸める */
+  border-radius: 24px;
   box-sizing: border-box;
 }
 
@@ -29,95 +28,67 @@ body {
   height: 100%;
 }
 
-.display-wrapper {
-  flex-shrink: 0;
-  margin-bottom: 20px;
-}
-
 #display {
   height: 100px;
-  font-size: 40px;
-  width: 100%;
+  font-size: 36px;
   padding: 0 20px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   background: #fff;
-  border-radius: 18px;
+  border-radius: 16px;
   box-shadow: inset 0 0 0 1px #ddd;
-  box-sizing: border-box;
+  margin-bottom: 16px;
+  overflow: hidden;
 }
 
 #history {
   background: #fff;
-  border-radius: 18px;
-  padding: 15px;
-  font-size: 18px;
+  border-radius: 16px;
+  padding: 12px;
   overflow-y: auto;
   border: 1px solid #ddd;
 }
 
-/* ボタンエリアの修正 */
 .buttons {
-  flex: 1; /* 残りの高さをすべて使う */
+  flex: 1;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(5, 1fr); /* 縦も5等分する */
-  gap: 12px;
+  grid-template-rows: repeat(5, 1fr) 60px; /* 最後の行を固定幅に */
+  gap: 10px;
 }
 
 button {
   width: 100%;
-  height: 100%; /* セルの高さに合わせる */
-  font-size: 24px;
-  font-weight: 500;
-  border-radius: 16px; /* 50%よりこちらの方がモダンな電卓に見えます */
+  height: 100%;
+  font-size: 22px;
+  border-radius: 12px;
   border: none;
-  background: #ffffff;
-  color: #007aff; /* iOS風の青 */
+  background: #fff;
+  color: #000;
   cursor: pointer;
-  transition: background 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-button:active {
-  background: #d1d1d6;
-}
+button:active { background: #e5e5ea; }
 
-/* 記号ボタンの色を変える例（お好みで） */
-button[onclick*="operator"], 
-button[onclick="calculate()"] {
+.btn-op { background: #007aff; color: #fff; }
+.btn-sub { background: #d1d1d6; color: #000; }
+
+.zero { grid-column: span 2; }
+.equal {
+  grid-column: span 4;
   background: #007aff;
   color: #fff;
+  font-size: 28px;
 }
 
-.zero {
-  grid-column: span 2;
-}
-
-/* レスポンシブ対応 */
-@media (max-width: 800px) {
-  .calculator {
-    grid-template-columns: 1fr; /* スマホでは1列にする */
-    grid-template-rows: 20% 1fr;
-  }
-  #history {
-    display: none; /* 小さい画面では履歴を隠すか、上に配置 */
-  }
-}
-
-/* style.css に追加 */
-
-/* 点滅するカーソルのスタイル */
+/* カーソル設定 */
 .cursor {
   display: inline-block;
   width: 2px;
-  height: 1.2em;
-  background-color: #007aff; /* iOS風の青 */
-  margin-left: 1px;
-  margin-right: 1px;
+  height: 1em;
+  background-color: #007aff;
+  margin: 0 1px;
   vertical-align: middle;
   animation: blink 1s step-end infinite;
 }
@@ -127,36 +98,7 @@ button[onclick="calculate()"] {
   50% { opacity: 0; }
 }
 
-/* MathJaxの出力内のカーソル位置を調整するためのクラス */
-.mjx-cursor-container {
-  display: inline-flex;
-  align-items: center;
-}
-
-/* style.css の修正・追加 */
-
-/* 1行目の移動ボタンなどの色を変えるとおしゃれです */
-button[onclick^="moveCursor"] {
-  background: #d1d1d6;
-  color: #000;
-  font-weight: bold;
-}
-
-/* ＝ボタンを目立たせる例 */
-.equal {
-  grid-column: span 4; /* 一番下に横長に配置 */
-  background: #007aff !important;
-  color: #fff !important;
-  border-radius: 12px;
-  height: 50px; /* 少し低めにするなど調整 */
-  margin-top: 8px;
-}
-
-/* ボタンエリア全体の調整（5行から6行になる場合など） */
-.buttons {
-  flex: 1;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(5, 1fr) auto; /* 最後に＝の行を追加 */
-  gap: 10px;
+@media (max-width: 600px) {
+  .calculator { grid-template-columns: 1fr; }
+  #history { display: none; }
 }
