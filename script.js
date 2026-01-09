@@ -4,14 +4,15 @@ const history = document.getElementById("history");
 let expression = "";
 let cursorIndex = 0;
 
+/* ===== 共通：TeX変換 ===== */
 function toTeX(expr) {
   return expr
     .replace(/\*/g, "\\times ")
     .replace(/\//g, "\\div ");
 }
 
+/* ===== ディスプレイ表示（カーソル対応） ===== */
 function renderDisplay() {
-  display.innerHTML = "";
   const before = expression.slice(0, cursorIndex);
   const after = expression.slice(cursorIndex);
 
@@ -19,14 +20,15 @@ function renderDisplay() {
   const texAfter = toTeX(after);
   const cursorHtml = '<span class="cursor"></span>';
   
-  // MathJaxが数式として認識できるように組み立て
+  // カーソルを挟んで表示。空の場合は空文字をMathJaxに渡さないよう工夫
   display.innerHTML = `<span>$${texBefore}$</span>${cursorHtml}<span>$${texAfter}$</span>`;
 
-  if (window.MathJax && window.MathJax.typesetPromise) {
+  if (window.MathJax && MathJax.typesetPromise) {
     MathJax.typesetPromise([display]);
   }
 }
 
+/* ===== 入力操作 ===== */
 function insert(value) {
   expression = expression.slice(0, cursorIndex) + value + expression.slice(cursorIndex);
   cursorIndex += value.length;
@@ -57,6 +59,7 @@ function clearAll() {
   renderDisplay();
 }
 
+/* ===== 演算子・小数点 ===== */
 function operator(op) {
   if (expression.length === 0 && op !== '-') return;
   const lastChar = expression[cursorIndex - 1];
@@ -77,6 +80,7 @@ function appendDot() {
   insert(lastNum === "" ? "0." : ".");
 }
 
+/* ===== 計算実行 ===== */
 function calculate() {
   let expr = expression;
   if (/[+\-*/]$/.test(expr)) expr = expr.slice(0, -1);
@@ -87,6 +91,7 @@ function calculate() {
     const line = document.createElement("div");
     line.innerHTML = `$${toTeX(expr)} = ${toTeX(String(result))}$`;
     history.appendChild(line);
+    
     if (window.MathJax) MathJax.typesetPromise([line]);
 
     expression = String(result);
@@ -99,14 +104,5 @@ function calculate() {
   }
 }
 
-// キーボード対応
-document.addEventListener("keydown", (e) => {
-  if (e.key === "ArrowLeft") moveCursor('left');
-  if (e.key === "ArrowRight") moveCursor('right');
-  if (e.key >= "0" && e.key <= "9") insert(e.key);
-  if (["+", "-", "*", "/"].includes(e.key)) operator(e.key);
-  if (e.key === "Enter") calculate();
-  if (e.key === "Backspace") deleteOne();
-});
-
+// 初期化
 renderDisplay();
