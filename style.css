@@ -15,8 +15,11 @@ body {
   height: 40px;
   font-size: 20px;
   text-align: right;
-  margin-bottom: 10px;
+  font-family: monospace;
   padding-right: 10px;
+  margin-bottom: 10px;
+  background: #fff;
+  color: #000;
 }
 
 .buttons {
@@ -43,16 +46,7 @@ button {
   white-space: pre-line;
 }
 
-#display {
-  font-family: monospace;
-}
-
 .cursor {
-}
-
-#display {
-  background: #fff;
-  color: #000;
 }
 
 .display-wrapper {
@@ -62,16 +56,15 @@ button {
 #fake-cursor {
   position: absolute;
   top: 8px;
+  right: 10px; 
   width: 2px;
   height: 24px;
   background: black;
+  z-index: 10;           
   animation: blink 1s step-start infinite;
+  pointer-events: none; 
 }
 
 @keyframes blink {
   50% { opacity: 0; }
-}
-
-#fake-cursor {
-  pointer-events: none;
 }
