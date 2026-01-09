@@ -53,3 +53,20 @@ button {
   background: #fff;
   color: #000;
 }
+
+.display-wrapper {
+  position: relative;
+}
+
+#fake-cursor {
+  position: absolute;
+  top: 8px;
+  width: 2px;
+  height: 24px;
+  background: black;
+  animation: blink 1s step-start infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
