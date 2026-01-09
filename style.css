@@ -12,6 +12,8 @@ body {
   min-height: 520px;
   height: auto;
 
+  align-items: stretch;
+
   gap: 12px;
   padding: 16px;
   background: #f2f2f7;
@@ -19,15 +21,22 @@ body {
   box-sizing: border-box;
 }
 
+.right {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
 .display-wrapper {
   width: 100%;
   margin-bottom: 12px;
+  flex-shrink: 0;
 }
 
 #display {
-  width: 100%;       
+  width: 100%;
   height: 90px;
-
   font-size: 38px;
   text-align: right;
   padding: 0 16px;
@@ -63,6 +72,7 @@ button {
 }
 
 #history {
+  height: 100%;
   background: #fff;
   border-radius: 14px;
   padding: 12px;
@@ -70,15 +80,4 @@ button {
   color: #444;
   overflow-y: auto;
   white-space: pre-line;
-}
-
-@keyframes blink {
-  50% { opacity: 0; }
-}
-
-.right {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
 }
