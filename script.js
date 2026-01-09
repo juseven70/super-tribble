@@ -15,9 +15,11 @@ function renderDisplay() {
     .replace(/\//g, "\\div ");
 
   display.innerHTML = `$${tex}$`;
-  MathJax.typesetPromise([display]);
-}
 
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise([display]);
+  }
+}
 // ===== 入力 =====
 function insert(value) {
   expression += value;
