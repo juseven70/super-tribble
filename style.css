@@ -31,8 +31,8 @@ body {
   padding: 0 16px;
   border: none;
   border-radius: 14px;
-  background: #000;
-  color: #fff;
+  background: #fff;
+  color: #000;
   box-sizing: border-box;
   caret-color: transparent;
 }
