@@ -7,32 +7,49 @@ body {
 }
 
 .calculator {
-  width: 480px;
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  height: 520px;
+  gap: 12px;
+  padding: 16px;
+  box-sizing: border-box;
+  background: #f2f2f7;
+  border-radius: 18px;
+}
+
+.display-wrapper {
+  position: relative;
+  margin-bottom: 12px;
 }
 
 #display {
   width: 100%;
-  height: 56px;
-  font-size: 28px;
+  height: 90px;
+  font-size: 38px;
   text-align: right;
-  font-family: monospace;
-  padding-right: 10px;
-  margin-bottom: 10px;
-  background: #fff;
-  color: #000;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  padding: 0 16px;
+  border: none;
+  border-radius: 14px;
+  background: #000;
+  color: #fff;
   box-sizing: border-box;
   caret-color: transparent;
 }
 
 .buttons {
+  flex: 1;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 5px;
+  gap: 10px;
 }
 
 button {
-  height: 72px;
-  font-size: 36px;
+  height: 64px;
+  font-size: 26px;
+  border-radius: 50%;
+  border: none;
+  background: #e5e5ea;
 }
 
 .zero {
@@ -40,16 +57,13 @@ button {
 }
 
 #history {
-  min-height: 20px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 12px;
   font-size: 14px;
-  text-align: right;
-  color: #888;
-  margin-bottom: 4px;
+  color: #444;
+  overflow-y: auto;
   white-space: pre-line;
-}
-
-.display-wrapper {
-  position: relative;
 }
 
 #fake-cursor {
@@ -65,4 +79,10 @@ button {
 
 @keyframes blink {
   50% { opacity: 0; }
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
