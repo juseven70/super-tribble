@@ -1,13 +1,13 @@
 let cursorVisible = true;
 
 function getText() {
-  return display.value.replace("|", "");
+  return display.value.replace(/\|/g, "");
 }
 const display = document.getElementById("display");
 const history = document.getElementById("history");
 
 function insert(value) {
-  const text = display.value.replace("|", "");
+  const text = getText();
   display.value =
     text.slice(0, cursor) + value + text.slice(cursor);
   cursor++;
@@ -129,7 +129,7 @@ function moveLeft() {
 }
 
 function moveRight() {
-  if (cursor < display.value.replace("|", "").length) cursor++;
+  if (cursor < getText().length) cursor++;
   render();
 }
 
