@@ -8,8 +8,34 @@ function appendValue(value) {
 function operator(op) {
   if (display.value === "") return;
 
-  history.textContent += display.value + op + "\n";
-  display.value = "";
+  // 記号が連続しないように
+  if (/[+\-*/]$/.test(display.value)) {
+    display.value = display.value.slice(0, -1);
+  }
+
+  display.value += op;
+}
+
+function appendDot() {
+  // 最後の数字に . がなければOK
+  const parts = display.value.split(/[+\-*/]/);
+  if (parts[parts.length - 1].includes(".")) return;
+
+  if (display.value === "" || /[+\-*/]$/.test(display.value)) {
+    display.value += "0.";
+  } else {
+    display.value += ".";
+  }
+}
+
+function percent() {
+  const parts = display.value.split(/[+\-*/]/);
+  const last = parts.pop();
+  if (last === "") return;
+
+  const result = Number(last) / 100;
+  display.value =
+    parts.join("") + (parts.length ? "" : "") + result;
 }
 
 function deleteOne() {
@@ -22,21 +48,22 @@ function clearAll() {
 }
 
 function calculate() {
-  let expression = history.textContent.replace(/\n/g, "") + display.value;
+  let expression = display.value;
 
-  display.value = eval(expression);
-  history.textContent = "";
-}
-function appendDot() {
-  if (display.value.includes(".")) return;
-  if (display.value === "") {
-    display.value = "0.";
-  } else {
-    display.value += ".";
+  // 最後が記号なら削除
+  if (/[+\-*/]$/.test(expression)) {
+    expression = expression.slice(0, -1);
   }
-}
 
-function percent() {
-  if (display.value === "") return;
-  display.value = String(Number(display.value) / 100);
+  try {
+    const result = eval(expression);
+
+    // 履歴に「式 = 結果」
+    history.textContent += `${expression} = ${result}\n`;
+
+    // 表示は結果だけ
+    display.value = result;
+  } catch {
+    display.value = "Error";
+  }
 }
