@@ -1,3 +1,6 @@
+function getText() {
+  return display.value;
+}
 
 const display = document.getElementById("display");
 const history = document.getElementById("history");
