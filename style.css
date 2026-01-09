@@ -8,6 +8,8 @@ body {
 
 .calculator {
   width: 220px;
+  transform: scale(1.5);
+  transform-origin: center;
 }
 
 #display {
