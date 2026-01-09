@@ -107,3 +107,28 @@ button[onclick="calculate()"] {
     display: none; /* 小さい画面では履歴を隠すか、上に配置 */
   }
 }
+
+/* style.css に追加 */
+
+/* 点滅するカーソルのスタイル */
+.cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.2em;
+  background-color: #007aff; /* iOS風の青 */
+  margin-left: 1px;
+  margin-right: 1px;
+  vertical-align: middle;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  from, to { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* MathJaxの出力内のカーソル位置を調整するためのクラス */
+.mjx-cursor-container {
+  display: inline-flex;
+  align-items: center;
+}
