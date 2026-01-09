@@ -145,18 +145,19 @@ function updateCursorPosition() {
     document.body.removeChild(span);
   }
 
-  const displayStyle = getComputedStyle(display);
-  const paddingRight = parseFloat(displayStyle.paddingRight);
+  const style = getComputedStyle(display);
+  const paddingRight = parseFloat(style.paddingRight);
+  const paddingLeft = parseFloat(style.paddingLeft);
 
-  const wrapper = display.parentElement;
-  const wrapperWidth = wrapper.clientWidth;
+  const innerWidth =
+    display.clientWidth - paddingLeft - paddingRight;
 
   let right = paddingRight + afterWidth;
 
-  const minRight = paddingRight;
-  const maxRight = wrapperWidth - 2;
-
-  right = Math.max(minRight, Math.min(right, maxRight));
+  right = Math.max(
+    paddingRight,
+    Math.min(right, paddingRight + innerWidth)
+  );
 
   fakeCursor.style.right = right + "px";
 }
