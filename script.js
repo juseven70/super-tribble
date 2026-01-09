@@ -112,7 +112,6 @@ function calculate() {
 }
 
 function render() {
-  display.value = getText();
   updateCursorPosition();
 }
 
