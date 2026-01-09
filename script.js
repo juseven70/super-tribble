@@ -129,7 +129,7 @@ const fakeCursor = document.getElementById("fake-cursor");
 
 function updateCursorPosition() {
   const beforeText = getText().slice(0, cursor);
-
+  
   const span = document.createElement("span");
   span.style.position = "absolute";
   span.style.visibility = "hidden";
