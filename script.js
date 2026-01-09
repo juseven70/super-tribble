@@ -129,10 +129,6 @@ function moveRight() {
   render();
 }
 
-setInterval(() => {
-  cursorVisible = !cursorVisible;
-  render();
-}, 500);
 
 render();
 
