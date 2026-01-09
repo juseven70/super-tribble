@@ -1,3 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>TeX電卓</title>
+
+  <!-- MathJax -->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"
+  defer>
+</script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="calculator">
+  <div id="history"></div>
+
+  <div class="right">
+    <div class="display-wrapper">
+      <div id="display"></div>
+    </div>
+
 <!-- index.html の .buttons の中身を以下に書き換え -->
 <div class="buttons">
   <!-- 1行目：クリア、カーソル移動、削除 -->
