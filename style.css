@@ -94,3 +94,16 @@ button {
 .zero {
   grid-column: span 2;
 }
+
+@media (max-width: 600px) {
+  .calculator {
+    grid-template-columns: 30% 1fr;
+  }
+}
+
+@media (orientation: landscape) {
+  button {
+    height: 72px;
+    font-size: 28px;
+  }
+}
