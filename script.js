@@ -109,14 +109,8 @@ function calculate() {
 }
 
 function render() {
-  const text = getText();
-
-  if (cursorVisible) {
-    display.value =
-      text.slice(0, cursor) + "|" + text.slice(cursor);
-  } else {
-    display.value = text;
-  }
+  display.value = getText();
+  updateCursorPosition();
 }
 
 function moveLeft() {
@@ -129,6 +123,13 @@ function moveRight() {
   render();
 }
 
+const fakeCursor = document.getElementById("fake-cursor");
+
+function updateCursorPosition() {
+  const charWidth = 12; 
+  fakeCursor.style.right =
+    (getText().length - cursor) * charWidth + 8 + "px";
+}
 
 render();
 
