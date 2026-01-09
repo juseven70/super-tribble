@@ -6,11 +6,17 @@ function appendValue(value) {
 }
 
 function operator(op) {
-  if (display.value === "") return;
+ if (display.value === "") return;
 
   // 記号が連続しないように
   if (/[+\-*/]$/.test(display.value)) {
     display.value = display.value.slice(0, -1);
+  }
+
+  display.value += op;
+
+  // ★計算途中では履歴を表示しない
+  history.textContent = "";
   }
 
   display.value += op;
