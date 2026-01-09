@@ -131,7 +131,7 @@ const fakeCursor = document.getElementById("fake-cursor");
 function updateCursorPosition() {
   const charWidth = 12; 
   fakeCursor.style.right =
-    (getText().length - cursor) * charWidth + 8 + "px";
+    (getText().length - cursor) * charWidth + 10 + "px";
 }
 
 render();
