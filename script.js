@@ -109,11 +109,13 @@ function calculate() {
     render();
   }
 }
+
 function render() {
-  const text = display.value;
+  const text = getText();
   display.value =
     text.slice(0, cursor) + "|" + text.slice(cursor);
 }
+
 function moveLeft() {
   if (cursor > 0) cursor--;
   render();
