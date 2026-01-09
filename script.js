@@ -128,39 +128,23 @@ function moveRight() {
 const fakeCursor = document.getElementById("fake-cursor");
 
 function updateCursorPosition() {
-  const afterText = getText().slice(cursor);
+  const beforeText = getText().slice(0, cursor);
 
-  let afterWidth = 0;
+  const span = document.createElement("span");
+  span.style.position = "absolute";
+  span.style.visibility = "hidden";
+  span.style.whiteSpace = "pre";
+  span.style.font = getComputedStyle(display).font;
+  span.textContent = beforeText || " ";
 
-  if (afterText.length > 0) {
-    const span = document.createElement("span");
-    span.style.position = "absolute";
-    span.style.visibility = "hidden";
-    span.style.whiteSpace = "pre";
-    span.style.font = getComputedStyle(display).font;
-    span.textContent = afterText;
-
-    document.body.appendChild(span);
-    afterWidth = span.getBoundingClientRect().width;
-    document.body.removeChild(span);
-  }
+  document.body.appendChild(span);
+  const textWidth = span.getBoundingClientRect().width;
+  document.body.removeChild(span);
 
   const style = getComputedStyle(display);
-  const paddingRight = parseFloat(style.paddingRight);
   const paddingLeft = parseFloat(style.paddingLeft);
 
-  const innerWidth =
-    display.clientWidth - paddingLeft - paddingRight;
-
-  let right = paddingRight + afterWidth;
-
-  right = Math.max(
-    paddingRight,
-    Math.min(right, paddingRight + innerWidth)
-  );
-
-  fakeCursor.style.right = right + "px";
+  fakeCursor.style.left = paddingLeft + textWidth + "px";
 }
 
 render();
-
