@@ -1,8 +1,12 @@
 const display = document.getElementById("display");
 const history = document.getElementById("history");
 
-function appendValue(value) {
-  display.value += value;
+function insert(value) {
+  const text = display.value.replace("|", "");
+  display.value =
+    text.slice(0, cursor) + value + text.slice(cursor);
+  cursor++;
+  render();
 }
 
 function operator(op) {
@@ -72,4 +76,30 @@ function calculate() {
   } catch {
     display.value = "Error";
   }
+}
+
+let cursor = 0;
+
+function render() {
+  const text = display.value;
+  display.value =
+    text.slice(0, cursor) + "|" + text.slice(cursor);
+}
+function moveLeft() {
+  if (cursor > 0) cursor--;
+  render();
+}
+
+function moveRight() {
+  if (cursor < display.value.replace("|", "").length) cursor++;
+  render();
+}
+function deleteOne() {
+  if (cursor === 0) return;
+
+  const text = display.value.replace("|", "");
+  display.value =
+    text.slice(0, cursor - 1) + text.slice(cursor);
+  cursor--;
+  render();
 }
