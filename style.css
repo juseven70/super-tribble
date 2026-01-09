@@ -48,3 +48,8 @@ button {
 
 .cursor {
 }
+
+#display {
+  background: #fff;
+  color: #000;
+}
