@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>TeX電卓</title>
-
   <!-- MathJax -->
   <script>
     window.MathJax = {
@@ -11,11 +10,7 @@
       svg: { fontCache: 'global' }
     };
   </script>
-  <script
-  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"
-  defer>
-</script>
-
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" defer></script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -28,34 +23,42 @@
       <div id="display"></div>
     </div>
 
-<!-- index.html の .buttons の中身を以下に書き換え -->
-<div class="buttons">
-  <!-- 1行目：クリア、カーソル移動、削除 -->
-  <button onclick="clearAll()">C</button>
-  <button onclick="moveCursor('left')">←</button>
-  <button onclick="moveCursor('right')">→</button>
-  <button onclick="deleteOne()">⌫</button>
+    <div class="buttons">
+      <!-- 1行目 -->
+      <button onclick="clearAll()" class="btn-sub">C</button>
+      <button onclick="moveCursor('left')" class="btn-sub">←</button>
+      <button onclick="moveCursor('right')" class="btn-sub">→</button>
+      <button onclick="deleteOne()" class="btn-sub">⌫</button>
 
-  <!-- 2行目以降 -->
-  <button onclick="insert('7')">7</button>
-  <button onclick="insert('8')">8</button>
-  <button onclick="insert('9')">9</button>
-  <button onclick="operator('/')">÷</button>
+      <!-- 2行目 -->
+      <button onclick="insert('7')">7</button>
+      <button onclick="insert('8')">8</button>
+      <button onclick="insert('9')">9</button>
+      <button onclick="operator('/')" class="btn-op">÷</button>
 
-  <button onclick="insert('4')">4</button>
-  <button onclick="insert('5')">5</button>
-  <button onclick="insert('6')">6</button>
-  <button onclick="operator('*')">×</button>
+      <!-- 3行目 -->
+      <button onclick="insert('4')">4</button>
+      <button onclick="insert('5')">5</button>
+      <button onclick="insert('6')">6</button>
+      <button onclick="operator('*')" class="btn-op">×</button>
 
-  <button onclick="insert('1')">1</button>
-  <button onclick="insert('2')">2</button>
-  <button onclick="insert('3')">3</button>
-  <button onclick="operator('-')">−</button>
+      <!-- 4行目 -->
+      <button onclick="insert('1')">1</button>
+      <button onclick="insert('2')">2</button>
+      <button onclick="insert('3')">3</button>
+      <button onclick="operator('-')" class="btn-op">−</button>
 
-  <button class="zero" onclick="insert('0')">0</button>
-  <button onclick="appendDot()">.</button>
-  <button onclick="operator('+')">+</button>
-  
-  <!-- 最後に = を配置するために grid を調整するか、スパンさせる -->
-  <button class="equal" onclick="calculate()">＝</button>
+      <!-- 5行目 -->
+      <button class="zero" onclick="insert('0')">0</button>
+      <button onclick="appendDot()">.</button>
+      <button onclick="operator('+')" class="btn-op">+</button>
+      
+      <!-- 6行目（横いっぱい） -->
+      <button class="equal" onclick="calculate()">＝</button>
+    </div>
+  </div>
 </div>
+
+<script src="script.js"></script>
+</body>
+</html>
