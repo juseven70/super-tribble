@@ -141,19 +141,24 @@ function updateCursorPosition() {
   const textWidth = span.getBoundingClientRect().width;
   document.body.removeChild(span);
 
-  const wrapperRect =
-    display.parentElement.getBoundingClientRect();
+  const wrapperRect = display.parentElement.getBoundingClientRect();
   const displayRect = display.getBoundingClientRect();
 
   const paddingRight =
     parseFloat(getComputedStyle(display).paddingRight);
 
-  fakeCursor.style.left =
+  let left =
     displayRect.right -
     wrapperRect.left -
     textWidth -
-    paddingRight +
-    "px";
+    paddingRight;
+
+  const minLeft = 8; // 左の余白
+  const maxLeft = displayRect.width - paddingRight - 2;
+
+  left = Math.max(minLeft, Math.min(left, maxLeft));
+
+  fakeCursor.style.left = left + "px";
 }
 render();
 
