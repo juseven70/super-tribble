@@ -9,12 +9,7 @@ body {
 .calculator {
   display: grid;
   grid-template-columns: 180px 1fr;
-  min-height: 520px;
-  height: auto;
-  width: 520px;    
-  max-width: 95vw; 
-  align-items: stretch;
-
+  height: 520px;
   gap: 12px;
   padding: 16px;
   background: #f2f2f7;
@@ -22,46 +17,47 @@ body {
   box-sizing: border-box;
 }
 
+#history {
+  background: #fff;
+  border-radius: 14px;
+  padding: 12px;
+  font-size: 14px;
+  color: #444;
+  overflow-y: auto;
+  white-space: pre-line;
+}
+
 .right {
   display: flex;
   flex-direction: column;
   height: 100%;
-  overflow: hidden;
-  min-width: 0;  
+  min-width: 0;
 }
 
 .display-wrapper {
-  width: 100%;
   margin-bottom: 12px;
-  flex-shrink: 0;
 }
 
 #display {
-  width: 100%;
   height: 90px;
-  font-size: 38px;
-  text-align: right;
-  padding: 0 16px;
-
-  border-radius: 14px;
   background: #fff;
-  color: #000;
-
-  outline: none;
-  white-space: nowrap;
-  overflow: hidden;
-
-  box-sizing: border-box;
+  border-radius: 14px;
   box-shadow: inset 0 0 0 1px #ddd;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  padding: 0 16px;
+  font-size: 38px;
+  overflow: hidden;
 }
 
 .buttons {
   flex: 1;
-  overflow: hidden; 
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
-  min-width: 0;
 }
 
 button {
@@ -74,15 +70,4 @@ button {
 
 .zero {
   grid-column: span 2;
-}
-
-#history {
-  height: 100%;
-  background: #fff;
-  border-radius: 14px;
-  padding: 12px;
-  font-size: 14px;
-  color: #444;
-  overflow-y: auto;
-  white-space: pre-line;
 }
