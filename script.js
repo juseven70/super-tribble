@@ -13,41 +13,31 @@ function toTeX(expr) {
 
 /* ===== ディスプレイ表示（カーソル対応） ===== */
 /* ===== ディスプレイ表示（ドルマーク修正版） ===== */
+/* ===== ディスプレイ表示（不具合修正版） ===== */
 function renderDisplay() {
-  // expressionをカーソル位置で分割
+  // 1. カーソルより前後の文字列を取得
   const before = expression.slice(0, cursorIndex);
   const after = expression.slice(cursorIndex);
 
+  // 2. それぞれをTeX形式に変換
   const texBefore = toTeX(before);
   const texAfter = toTeX(after);
+
+  // 3. HTMLを組み立て
+  // 内容が空でも $ $ で囲まずにカーソルを表示し、
+  // 内容がある時だけ $ $ で囲むように「三項演算子」を使います
+  const htmlBefore = texBefore ? `$${texBefore}$` : "";
+  const htmlAfter = texAfter ? `$${texAfter}$` : "";
   const cursorHtml = '<span class="cursor"></span>';
-  
-  // 文字がある場合のみ $ $ で囲むように修正
-  let htmlContent = "";
-  
-  if (texBefore) {
-    htmlContent += `<span>$${texBefore}$</span>`;
-  }
-  
-  htmlContent += cursorHtml; // カーソルは常に表示
-  
-  if (texAfter) {
-    htmlContent += `<span>$${texAfter}$</span>`;
-  }
-  
-  display.innerHTML = htmlContent;
 
-  // MathJaxに再描画を依頼（中身があるときだけ実行）
-  if (window.MathJax && (texBefore || texAfter)) {
-    MathJax.typesetPromise([display]);
-  }
-}
-  
-  // カーソルを挟んで表示。空の場合は空文字をMathJaxに渡さないよう工夫
-  display.innerHTML = `<span>$${texBefore}$</span>${cursorHtml}<span>$${texAfter}$</span>`;
+  // 画面を更新（ここが実行されれば必ずカーソルは出ます）
+  display.innerHTML = `<span>${htmlBefore}</span>${cursorHtml}<span>${htmlAfter}</span>`;
 
-  if (window.MathJax && MathJax.typesetPromise) {
-    MathJax.typesetPromise([display]);
+  // 4. MathJaxに数式の描画を依頼（エラーが出ないよう安全に実行）
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    MathJax.typesetPromise([display]).catch((err) => {
+      console.log("MathJax error:", err);
+    });
   }
 }
 
