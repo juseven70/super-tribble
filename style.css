@@ -43,6 +43,10 @@ body {
   overflow-x: auto;          /* 長くなったら横スクロール */
   white-space: nowrap;       /* 改行させない */
 }
+#display > span {
+  display: flex;
+  align-items: center;
+}
 
 #history {
   background: #fff;
@@ -87,14 +91,13 @@ button:active { opacity: 0.6; }
   height: 60px; /* 計算ボタンの高さ調整 */
 }
 
-/* 点滅カーソル */
 .cursor {
   display: inline-block;
-  width: 2px;
-  height: 1.2em;
+  width: 3px;               /* 少し太くしました */
+  height: 40px;             /* 高さを明示的に指定 */
   background-color: #007aff;
   margin: 0 2px;
-  vertical-align: middle; /* これで数式と高さが揃います */
+  vertical-align: middle;
   animation: blink 1s step-end infinite;
 }
 
