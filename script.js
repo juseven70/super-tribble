@@ -12,13 +12,36 @@ function toTeX(expr) {
 }
 
 /* ===== ディスプレイ表示（カーソル対応） ===== */
+/* ===== ディスプレイ表示（ドルマーク修正版） ===== */
 function renderDisplay() {
+  // expressionをカーソル位置で分割
   const before = expression.slice(0, cursorIndex);
   const after = expression.slice(cursorIndex);
 
   const texBefore = toTeX(before);
   const texAfter = toTeX(after);
   const cursorHtml = '<span class="cursor"></span>';
+  
+  // 文字がある場合のみ $ $ で囲むように修正
+  let htmlContent = "";
+  
+  if (texBefore) {
+    htmlContent += `<span>$${texBefore}$</span>`;
+  }
+  
+  htmlContent += cursorHtml; // カーソルは常に表示
+  
+  if (texAfter) {
+    htmlContent += `<span>$${texAfter}$</span>`;
+  }
+  
+  display.innerHTML = htmlContent;
+
+  // MathJaxに再描画を依頼（中身があるときだけ実行）
+  if (window.MathJax && (texBefore || texAfter)) {
+    MathJax.typesetPromise([display]);
+  }
+}
   
   // カーソルを挟んで表示。空の場合は空文字をMathJaxに渡さないよう工夫
   display.innerHTML = `<span>$${texBefore}$</span>${cursorHtml}<span>$${texAfter}$</span>`;
