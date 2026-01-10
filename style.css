@@ -34,13 +34,14 @@ body {
   width: 100%;
   padding: 0 20px;
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
+  align-items: center;      /* 縦方向の真ん中 */
+  justify-content: flex-end; /* 数字を右側に寄せる */
   background: #fff;
   border-radius: 16px;
   box-shadow: inset 0 0 0 1px #ddd;
   margin-bottom: 20px;
-  overflow: hidden;
+  overflow-x: auto;          /* 長くなったら横スクロール */
+  white-space: nowrap;       /* 改行させない */
 }
 
 #history {
@@ -93,7 +94,7 @@ button:active { opacity: 0.6; }
   height: 1.2em;
   background-color: #007aff;
   margin: 0 2px;
-  vertical-align: middle;
+  vertical-align: middle; /* これで数式と高さが揃います */
   animation: blink 1s step-end infinite;
 }
 
