@@ -164,11 +164,31 @@ function calculate() {
 renderDisplay();
 
 // ==========================================
-// キーボード入力への対応
+// キーボード入力への対応（かな入力対応版）
 // ==========================================
 document.addEventListener('keydown', function(event) {
-  const key = event.key;
+  let key = event.key;
 
+  // 【追加】全角の数字や記号（１、＋、＝ など）を、半角に自動変換する
+  key = key.replace(/[０-９．＋－＊／＝％]/g, function(s) {
+    return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+  });
+
+  // 【追加】日本語キーボード特有の文字を、計算用の記号に強制翻訳する
+  const keyMap = {
+    'ー': '-',  // 長音符をマイナスに
+    '−': '-',   // 全角マイナスを半角マイナスに
+    '×': '*',   
+    '÷': '/',   
+    '。': '.',  // 句点を小数点に
+    '、': '.',  // 読点を小数点に
+    '・': '/'   // め のキー（中黒）を割り算に
+  };
+  if (keyMap[key]) {
+    key = keyMap[key];
+  }
+
+  // --- 以下は判定処理 ---
   // 数字キー (0-9)
   if (/^[0-9]$/.test(key)) {
     insert(key);
@@ -183,7 +203,7 @@ document.addEventListener('keydown', function(event) {
   }
   // イコール、Enterキー (計算実行)
   else if (key === 'Enter' || key === '=') {
-    event.preventDefault(); // Enterキーでボタンが再度押されるのを防ぐ
+    event.preventDefault(); // Enterでボタンが押されるのを防ぐ
     calculate();
   }
   // Backspaceキー (1文字削除)
