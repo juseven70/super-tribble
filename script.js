@@ -162,3 +162,47 @@ function calculate() {
 }
 // 初期化
 renderDisplay();
+
+// ==========================================
+// キーボード入力への対応
+// ==========================================
+document.addEventListener('keydown', function(event) {
+  const key = event.key;
+
+  // 数字キー (0-9)
+  if (/^[0-9]$/.test(key)) {
+    insert(key);
+  }
+  // 演算子 (+, -, *, /)
+  else if (key === '+' || key === '-' || key === '*' || key === '/') {
+    operator(key);
+  }
+  // 小数点
+  else if (key === '.') {
+    appendDot();
+  }
+  // イコール、Enterキー (計算実行)
+  else if (key === 'Enter' || key === '=') {
+    event.preventDefault(); // Enterキーでボタンが再度押されるのを防ぐ
+    calculate();
+  }
+  // Backspaceキー (1文字削除)
+  else if (key === 'Backspace') {
+    deleteOne();
+  }
+  // Escapeキー (オールクリア: AC)
+  else if (key === 'Escape') {
+    clearAll();
+  }
+  // パーセント (%)
+  else if (key === '%') {
+    insertPercent();
+  }
+  // 左右の矢印キー (カーソル移動)
+  else if (key === 'ArrowLeft') {
+    moveCursor('left');
+  }
+  else if (key === 'ArrowRight') {
+    moveCursor('right');
+  }
+});
