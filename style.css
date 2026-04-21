@@ -82,25 +82,20 @@ body {
 #display::-webkit-scrollbar { display: none; }
 #display { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* 点滅カーソル */
-/* 点滅カーソル */
+
 .cursor {
   display: inline-block;
-  width: 2px; /* 少し細くするとよりスマートになります */
+  width: 2px;
   height: 1.2em;
-  background-color: #007aff; /* iOSの青 */
-  
-  /* ↓ココがポイント！ 自身の幅を打ち消すことで前後の文字をくっつける */
+  background-color: #007aff; 
   margin: 0 -1px; 
-  
-  /* ↓数式に重なっても隠れないように前面に出す */
   position: relative;
   z-index: 10; 
-
   vertical-align: middle;
   animation: blink 1s step-end infinite;
   flex-shrink: 0;
 }
+
 
 @keyframes blink {
   from, to { opacity: 1; }
@@ -112,7 +107,7 @@ body {
   flex: 1;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(5, 1fr) auto; /* 5行 + ＝ボタン用 */
+  grid-template-rows: repeat(6, 1fr); /* 6行均等に変更 */
   gap: 12px;
 }
 
@@ -138,49 +133,36 @@ button:active {
   transform: scale(0.98);
 }
 
-/* 記号ボタン（青色） */
-.btn-op, button[onclick*="operator"] {
+/* 記号ボタン（青色）※スクショ風にするなら #ff9f0a に変えるとオレンジになります */
+.btn-op, .equal {
   background: #007aff;
   color: #fff;
 }
 
 /* 特殊ボタン（薄いグレー） */
-.btn-sub, button[onclick="clearAll()"], button[onclick^="moveCursor"], button[onclick="deleteOne()"] {
+.btn-sub {
   background: #d1d1d6;
   color: #000;
 }
 
-/* 「0」ボタン（2列分） */
-.zero {
+/* 移動ボタン（2マス分使う） */
+.btn-nav {
   grid-column: span 2;
-}
-
-/* 「＝」ボタン（1番下の行で横いっぱいに） */
-.equal {
-  grid-column: span 4;
-  background: #007aff;
-  color: #fff;
-  height: 64px; /* 高さを少し固定して安定させる */
-  font-size: 28px;
-  margin-top: 4px;
+  background: #d1d1d6;
+  color: #000;
 }
 
 /* スマホ対応（画面が狭い時） */
 @media (max-width: 800px) {
   .calculator {
     grid-template-columns: 1fr;
-    grid-template-rows: 200px 1fr; /* 履歴を上に持ってくる */
+    grid-template-rows: 200px 1fr; 
   }
-  #history {
-    font-size: 14px;
-  }
-  #display {
-    height: 80px;
-    font-size: 28px;
-  }
+  #history { font-size: 14px; }
+  #display { height: 80px; font-size: 28px; }
 }
 
-/* MathJaxの調整 */
+
 .mjx-chtml, mjx-container {
   margin: 0 !important;
   padding: 0 !important;
