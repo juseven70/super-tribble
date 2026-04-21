@@ -83,12 +83,20 @@ body {
 #display { -ms-overflow-style: none; scrollbar-width: none; }
 
 /* 点滅カーソル */
+/* 点滅カーソル */
 .cursor {
   display: inline-block;
-  width: 3px;
+  width: 2px; /* 少し細くするとよりスマートになります */
   height: 1.2em;
   background-color: #007aff; /* iOSの青 */
-  margin: 0 2px;
+  
+  /* ↓ココがポイント！ 自身の幅を打ち消すことで前後の文字をくっつける */
+  margin: 0 -1px; 
+  
+  /* ↓数式に重なっても隠れないように前面に出す */
+  position: relative;
+  z-index: 10; 
+
   vertical-align: middle;
   animation: blink 1s step-end infinite;
   flex-shrink: 0;
@@ -173,6 +181,7 @@ button:active {
 }
 
 /* MathJaxの調整 */
-.mjx-chtml {
+.mjx-chtml, mjx-container {
   margin: 0 !important;
+  padding: 0 !important;
 }
