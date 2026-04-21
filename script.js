@@ -4,42 +4,69 @@ const history = document.getElementById("history");
 let expression = "";
 let cursorIndex = 0;
 
+// カーソル位置を特定するための見えないマーカー
+const MARKER = 'ᴥ';
+
 function toTeX(expr) {
   return expr
     .replace(/\*/g, "\\times ")
     .replace(/\//g, "\\div ")
-    .replace(/%/g, "\\% "); // % の変換を追加
+    .replace(/%/g, "\\% ")
+    // n乗根 (例: 3ⁿ√8)
+    .replace(/([\d.ᴥ]+)ⁿ√([\d.ᴥ]*)/g, "\\sqrt[$1]{$2}")
+    // 3乗根
+    .replace(/∛([\d.ᴥ]*)/g, "\\sqrt[3]{$1}")
+    // ルート
+    .replace(/√([\d.ᴥ]*)/g, "\\sqrt{$1}")
+    // べき乗 (例: ^2, ^3, ^y)
+    .replace(/\^([\d.ᴥ]*)/g, "^{$1}");
 }
 
 function renderDisplay() {
-  const before = expression.slice(0, cursorIndex);
-  const after = expression.slice(cursorIndex);
-  
-  let texBefore = toTeX(before);
-  let texAfter = toTeX(after);
+  // 数式の中にカーソルマーカーを埋め込んでからTeXに一括変換する（屋根が途切れない魔法）
+  const exprWithCursor = expression.slice(0, cursorIndex) + MARKER + expression.slice(cursorIndex);
+  let tex = toTeX(exprWithCursor);
 
-  // --- 追加部分：MathJaxのレイアウト崩れ（ガタつき）防止 ---
-  // カーソルの位置で数式が2つに分断されるため、演算子が単独の記号として扱われ
-  // 左右のスペースが詰まってしまう現象を防ぎます。
-  // 切断面に演算子がある場合は、見えない空の要素 `{}` を補います。
-  if (/[+\-*/]$/.test(before)) {
-    texBefore += "{}";
-  }
-  if (/^[+\-*/]/.test(after)) {
-    texAfter = "{}" + texAfter;
-  }
-  // -----------------------------------------------------
+  // マーカーを「青色の太い縦線」のTeXコマンドに置換
+  tex = tex.replace(MARKER, '{\\color{#007aff}{\\mathbf{|}}}');
 
-  const htmlBefore = texBefore ? `$${texBefore}$` : "";
-  const htmlAfter = texAfter ? `$${texAfter}$` : "";
-  const cursorHtml = '<span class="cursor"></span>';
-
-  display.innerHTML = `<span>${htmlBefore}</span>${cursorHtml}<span>${htmlAfter}</span>`;
+  display.innerHTML = `<span>$${tex}$</span>`;
 
   if (window.MathJax && window.MathJax.typesetPromise) {
-    MathJax.typesetPromise([display]).catch((err) => {
-      console.log("MathJax error:", err);
-    });
+    MathJax.typesetPromise([display]).catch((err) => console.log("MathJax error:", err));
+  }
+}
+
+function calculate() {
+  let expr = expression;
+  if (/[+\-*/^√∛]$/.test(expr)) expr = expr.slice(0, -1);
+  if (!expr) return;
+
+  try {
+    // 記号をJavaScriptのMath関数に翻訳して計算する
+    let evalExpr = expr
+      .replace(/([\d.]+)%/g, '($1/100)')
+      .replace(/([\d.]+)ⁿ√([\d.]+)/g, 'Math.pow($2, 1/$1)') // 3ⁿ√8 -> 8の(1/3)乗
+      .replace(/∛([\d.]+)/g, 'Math.cbrt($1)')               // 3乗根
+      .replace(/√([\d.]+)/g, 'Math.sqrt($1)')               // ルート
+      .replace(/\^/g, '**');                                // べき乗 (2^3 -> 2**3)
+    
+    let result = eval(evalExpr);
+    result = parseFloat(result.toPrecision(12));
+
+    const line = document.createElement("div");
+    line.innerHTML = `$${toTeX(expr)} = ${toTeX(String(result))}$`;
+    history.appendChild(line);
+    
+    if (window.MathJax) MathJax.typesetPromise([line]);
+
+    expression = String(result);
+    cursorIndex = expression.length;
+    renderDisplay();
+  } catch {
+    expression = "Error";
+    cursorIndex = 0;
+    renderDisplay();
   }
 }
 
@@ -132,34 +159,6 @@ function appendDot() {
   insert(lastNum === "" ? "0." : ".");
 }
 
-/* ===== 計算実行 ===== */
-function calculate() {
-  let expr = expression;
-  if (/[+\-*/]$/.test(expr)) expr = expr.slice(0, -1);
-  if (!expr) return;
-
-  try {
-    // 【追加】「数字+%」を見つけたら「(数字/100)」に置き換える（例: 50% -> (50/100)）
-    let evalExpr = expr.replace(/([\d.]+)%/g, '($1/100)');
-    
-    let result = eval(evalExpr);
-    result = parseFloat(result.toPrecision(12));
-
-    const line = document.createElement("div");
-    line.innerHTML = `$${toTeX(expr)} = ${toTeX(String(result))}$`;
-    history.appendChild(line);
-    
-    if (window.MathJax) MathJax.typesetPromise([line]);
-
-    expression = String(result);
-    cursorIndex = expression.length;
-    renderDisplay();
-  } catch {
-    expression = "Error";
-    cursorIndex = 0;
-    renderDisplay();
-  }
-}
 // 初期化
 renderDisplay();
 
@@ -200,6 +199,9 @@ document.addEventListener('keydown', function(event) {
   // 小数点
   else if (key === '.') {
     appendDot();
+  }
+  else if (key === '^') {
+    insert('^');
   }
   // イコール、Enterキー (計算実行)
   else if (key === 'Enter' || key === '=') {
