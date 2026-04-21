@@ -70,7 +70,7 @@ function moveCursor(direction) {
 function clearAll() {
   expression = "";
   cursorIndex = 0;
-  history.innerHTML = "";
+  // history.innerHTML = "";  ← この1行を削除（または先頭に//をつけて無効化）します
   renderDisplay();
 }
 
