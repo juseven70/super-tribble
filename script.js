@@ -6,6 +6,7 @@ let cursorIndex = 0;
 const MARKER = 'ᴥ'; // カーソル位置計算用の内部マーカー
 
 // 表示用のTeX変換（順番を整理して衝突を防止）
+// 表示用のTeX変換（指数表記の表示崩れを完全に修正）
 function toTeX(expr) {
   let tex = expr
     .replace(/\*/g, "\\times ")
@@ -18,12 +19,11 @@ function toTeX(expr) {
            .replace(/√([\d.ᴥ]*)/g, "\\sqrt{$1}");
 
   // 2. べき乗 (^) を変換
-  // e変換と混ざらないよう、ここで先に処理する
   tex = tex.replace(/\^([\d.ᴥ]*)/g, "^{$1}");
 
-  // 3. 指数表記 (e+25, e-10) を変換
-  // + を消して \times 10^{n} の形にする
-  tex = tex.replace(/e\+?(-?\d+)/g, " \\times 10^{$1}");
+  // 3. 【重要修正】指数表記 (e+99) を 10^{99} に変換
+  // ^ を付け忘れていたのを修正し、カーソルマーカー(ᴥ)が含まれていても反応するようにしました
+  tex = tex.replace(/e\+?(-?[\dᴥ]+)/g, " \\times 10^{$1}");
 
   return tex;
 }
