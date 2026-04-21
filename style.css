@@ -23,17 +23,50 @@ body {
 /* 電卓の外枠 */
 .calculator {
   display: grid;
-  grid-template-columns: 260px 1fr; /* 左:履歴、右:メイン */
-  width: 95%;
-  height: 92%; /* 画面の高さに合わせる */
-  max-width: 1100px;
+  grid-template-columns: 260px 1fr;
+  width: 98%;           /* 5列に増えたので少し広げる */
+  height: 92%; 
+  max-width: 1200px;    /* 最大幅も少し広げる */
   max-height: 750px;
   gap: 16px;
   padding: 16px;
-  background: #f2f2f7; /* iOS風の薄いグレー */
+  background: #f2f2f7;
   border-radius: 24px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.3);
 }
+
+/* ボタンエリア */
+.buttons {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 【変更】4列から5列へ */
+  grid-template-rows: repeat(6, 1fr);
+  gap: 8px; 
+}
+
+/* 関数ボタン（薄いグレーより少し濃くするか、同じにする） */
+.btn-func {
+  background: #e5e5ea;
+  color: #000;
+}
+
+/* 移動ボタン（2マス分使う） */
+.btn-nav {
+  grid-column: span 2; /* 1+2+2=5列でピッタリ収まる */
+  background: #d1d1d6;
+  color: #000;
+}
+
+/* ====== 数式内の青いカーソルを点滅させる魔法 ====== */
+[fill="#007aff"], [color="#007aff"] {
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink {
+  from, to { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* 【注意】以前の .cursor クラスは不要になったため削除してもOKです */
 
 /* 左側：計算履歴 */
 #history {
@@ -88,32 +121,10 @@ body {
 #display::-webkit-scrollbar { display: none; }
 #display { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* 点滅カーソル */
-.cursor {
-  display: inline-block;
-  width: 2px;
-  height: 1.2em;
-  background-color: #007aff; /* iOSの青 */
-  margin: 0 -1px; /* 自身の幅を打ち消すことで前後の文字をくっつける */
-  position: relative;
-  z-index: 10; /* 数式に重なっても隠れないように前面に出す */
-  vertical-align: middle;
-  animation: blink 1s step-end infinite;
-  flex-shrink: 0;
-}
 
 @keyframes blink {
   from, to { opacity: 1; }
   50% { opacity: 0; }
-}
-
-/* ボタンエリア */
-.buttons {
-  flex: 1;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(6, 1fr); /* 6行均等 */
-  gap: 8px; /* ボタン下部の見切れを防ぐために少し狭く */
 }
 
 /* ボタンの基本スタイル */
@@ -152,13 +163,6 @@ button:active {
 
 /* 特殊ボタン（薄いグレー） */
 .btn-sub {
-  background: #d1d1d6;
-  color: #000;
-}
-
-/* 移動ボタン（2マス分使う） */
-.btn-nav {
-  grid-column: span 2;
   background: #d1d1d6;
   color: #000;
 }
