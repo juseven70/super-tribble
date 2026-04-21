@@ -11,29 +11,31 @@ function toTeX(expr) {
     .replace(/\//g, "\\div ");
 }
 
-/* ===== ディスプレイ表示（カーソル対応） ===== */
-/* ===== ディスプレイ表示（ドルマーク修正版） ===== */
-/* ===== ディスプレイ表示（不具合修正版） ===== */
 function renderDisplay() {
-  // 1. カーソルより前後の文字列を取得
   const before = expression.slice(0, cursorIndex);
   const after = expression.slice(cursorIndex);
+  
+  let texBefore = toTeX(before);
+  let texAfter = toTeX(after);
 
-  // 2. それぞれをTeX形式に変換
-  const texBefore = toTeX(before);
-  const texAfter = toTeX(after);
+  // --- 追加部分：MathJaxのレイアウト崩れ（ガタつき）防止 ---
+  // カーソルの位置で数式が2つに分断されるため、演算子が単独の記号として扱われ
+  // 左右のスペースが詰まってしまう現象を防ぎます。
+  // 切断面に演算子がある場合は、見えない空の要素 `{}` を補います。
+  if (/[+\-*/]$/.test(before)) {
+    texBefore += "{}";
+  }
+  if (/^[+\-*/]/.test(after)) {
+    texAfter = "{}" + texAfter;
+  }
+  // -----------------------------------------------------
 
-  // 3. HTMLを組み立て
-  // 内容が空でも $ $ で囲まずにカーソルを表示し、
-  // 内容がある時だけ $ $ で囲むように「三項演算子」を使います
   const htmlBefore = texBefore ? `$${texBefore}$` : "";
   const htmlAfter = texAfter ? `$${texAfter}$` : "";
   const cursorHtml = '<span class="cursor"></span>';
 
-  // 画面を更新（ここが実行されれば必ずカーソルは出ます）
   display.innerHTML = `<span>${htmlBefore}</span>${cursorHtml}<span>${htmlAfter}</span>`;
 
-  // 4. MathJaxに数式の描画を依頼（エラーが出ないよう安全に実行）
   if (window.MathJax && window.MathJax.typesetPromise) {
     MathJax.typesetPromise([display]).catch((err) => {
       console.log("MathJax error:", err);
