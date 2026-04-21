@@ -1,4 +1,3 @@
-/* 全体設定：はみ出し防止のための基本ルール */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -6,28 +5,27 @@
 }
 
 body {
-  /* 画面に完全固定してスクロールを封じる必殺技 */
+  /* iPad Safariのスクロール・見切れ対策 */
   position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
-  
   display: flex;
   justify-content: center;
   align-items: center;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: #000; /* 背景は黒 */
+  background: #000;
+  overflow: hidden;
 }
 
-/* 電卓の外枠 */
 .calculator {
   display: grid;
   grid-template-columns: 260px 1fr;
-  width: 98%;           /* 5列に増えたので少し広げる */
-  height: 92%; 
-  max-width: 1200px;    /* 最大幅も少し広げる */
-  max-height: 750px;
+  width: 98%;
+  height: 94%;
+  max-width: 1200px;
+  max-height: 800px;
   gap: 16px;
   padding: 16px;
   background: #f2f2f7;
@@ -35,40 +33,6 @@ body {
   box-shadow: 0 20px 60px rgba(0,0,0,0.3);
 }
 
-/* ボタンエリア */
-.buttons {
-  flex: 1;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr); /* 【変更】4列から5列へ */
-  grid-template-rows: repeat(6, 1fr);
-  gap: 8px; 
-}
-
-/* 関数ボタン（薄いグレーより少し濃くするか、同じにする） */
-.btn-func {
-  background: #e5e5ea;
-  color: #000;
-}
-
-/* 移動ボタン（2マス分使う） */
-.btn-nav {
-  grid-column: span 2; /* 1+2+2=5列でピッタリ収まる */
-  background: #d1d1d6;
-  color: #000;
-}
-
-/* ====== 数式内の青いカーソルを点滅させる魔法 ====== */
-[fill="#007aff"], [color="#007aff"] {
-  animation: blink 1s step-end infinite;
-}
-@keyframes blink {
-  from, to { opacity: 1; }
-  50% { opacity: 0; }
-}
-
-/* 【注意】以前の .cursor クラスは不要になったため削除してもOKです */
-
-/* 左側：計算履歴 */
 #history {
   background: #fff;
   border-radius: 18px;
@@ -81,108 +45,85 @@ body {
   gap: 10px;
 }
 
-/* 右側：ディスプレイとボタン */
 .right {
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-width: 0; /* これがないと中身に合わせて横に突き抜ける */
+  min-width: 0;
 }
 
-/* ディスプレイの包み要素 */
 .display-wrapper {
   width: 100%;
   flex-shrink: 0;
   margin-bottom: 12px;
-  /* ディスプレイの高さも画面に合わせて柔軟に縮むようにする */
-  height: max(60px, 12%);
+  height: max(60px, 15%);
 }
 
-/* ディスプレイ本体 */
 #display {
-  height: 100%; /* wrapperの高さに合わせる */
+  height: 100%;
   width: 100%;
-  max-width: 100%;
   background: #fff;
   border-radius: 16px;
   box-shadow: inset 0 0 0 1px #ddd;
   padding: 0 20px;
-  
   display: flex;
-  align-items: center;       /* 縦中央 */
-  justify-content: flex-end; /* 右寄せ */
-  
+  align-items: center;
+  justify-content: flex-end;
   font-size: 36px;
-  overflow-x: auto;          /* 長くなったら横スクロール */
-  white-space: nowrap;       /* 改行禁止 */
+  overflow-x: auto;
+  white-space: nowrap;
 }
 
-/* スクロールバーを非表示にする（ブラウザによって使い分け） */
 #display::-webkit-scrollbar { display: none; }
 #display { -ms-overflow-style: none; scrollbar-width: none; }
 
-
-@keyframes blink {
-  from, to { opacity: 1; }
-  50% { opacity: 0; }
+.buttons {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  gap: 8px;
 }
 
-/* ボタンの基本スタイル */
 button {
   width: 100%;
   height: 100%;
   min-height: 0;
-  
-  touch-action: manipulation; 
-  user-select: none;          
-  -webkit-user-select: none;  
-  
-  font-size: 22px;
+  /* iPad連打対策・ラグ解消 */
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  font-size: 20px;
   font-weight: 500;
   border-radius: 12px;
   border: none;
   background: #ffffff;
   color: #000;
   cursor: pointer;
-  transition: background 0.1s, transform 0.05s;
+  transition: background 0.1s;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-button:active {
-  background: #e5e5ea;
-  transform: scale(0.98);
+button:active { background: #e5e5ea; }
+
+.btn-op, .equal { background: #007aff; color: #fff; }
+.btn-sub { background: #d1d1d6; }
+.btn-func { background: #e5e5ea; }
+.btn-nav { grid-column: span 2; background: #d1d1d6; }
+
+/* 数式内カーソルの点滅アニメーション */
+[fill="#007aff"], [color="#007aff"] {
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink {
+  from, to { opacity: 1; }
+  50% { opacity: 0; }
 }
 
-/* 記号・計算実行ボタン（青色） */
-.btn-op, .equal {
-  background: #007aff;
-  color: #fff;
-}
-
-/* 特殊ボタン（薄いグレー） */
-.btn-sub {
-  background: #d1d1d6;
-  color: #000;
-}
-
-/* スマホ対応（画面が狭い時） */
 @media (max-width: 800px) {
-  .calculator {
-    grid-template-columns: 1fr;
-    grid-template-rows: 150px 1fr; /* 履歴を上に持ってくる */
-  }
-  #history {
-    font-size: 14px;
-  }
-  #display {
-    font-size: 28px;
-  }
-}
-
-/* MathJaxの調整（余白の無効化） */
-.mjx-chtml, mjx-container {
-  margin: 0 !important;
-  padding: 0 !important;
+  .calculator { grid-template-columns: 1fr; grid-template-rows: 150px 1fr; }
+  #history { font-size: 14px; }
+  #display { font-size: 28px; }
 }
