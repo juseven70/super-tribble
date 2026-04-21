@@ -3,32 +3,38 @@ const history = document.getElementById("history");
 
 let expression = "";
 let cursorIndex = 0;
-const MARKER = 'ᴥ'; // カーソル位置を計算するための内部マーカー
+const MARKER = 'ᴥ'; // カーソル位置計算用の内部マーカー
 
-// 表示用のTeX変換
+// 表示用のTeX変換（順番を整理して衝突を防止）
 function toTeX(expr) {
-  return expr
+  let tex = expr
     .replace(/\*/g, "\\times ")
     .replace(/\//g, "\\div ")
-    .replace(/%/g, "\\% ")
-    // --- 指数表記 (e+25 や e-10) を美しく変換 ---
-    // e+25 -> \times 10^{25}, e-10 -> \times 10^{-10} に変換します
-    .replace(/e\+?(-?\d+)/g, " \\times 10^{$1}") 
-    // ---------------------------------------
-    .replace(/([\d.ᴥ]+)ⁿ√([\d.ᴥ]*)/g, "\\sqrt[$1]{$2}")
-    .replace(/∛([\d.ᴥ]*)/g, "\\sqrt[3]{$1}")
-    .replace(/√([\d.ᴥ]*)/g, "\\sqrt{$1}")
-    .replace(/\^([\d.ᴥ]*)/g, "^{$1}");
+    .replace(/%/g, "\\% ");
+
+  // 1. ルート系を先に変換
+  tex = tex.replace(/([\d.ᴥ]+)ⁿ√([\d.ᴥ]*)/g, "\\sqrt[$1]{$2}")
+           .replace(/∛([\d.ᴥ]*)/g, "\\sqrt[3]{$1}")
+           .replace(/√([\d.ᴥ]*)/g, "\\sqrt{$1}");
+
+  // 2. べき乗 (^) を変換
+  // e変換と混ざらないよう、ここで先に処理する
+  tex = tex.replace(/\^([\d.ᴥ]*)/g, "^{$1}");
+
+  // 3. 指数表記 (e+25, e-10) を変換
+  // + を消して \times 10^{n} の形にする
+  tex = tex.replace(/e\+?(-?\d+)/g, " \\times 10^{$1}");
+
+  return tex;
 }
 
 // 画面描画
 function renderDisplay() {
-  // カーソルマーカーを埋め込んで変換
   const exprWithCursor = expression.slice(0, cursorIndex) + MARKER + expression.slice(cursorIndex);
   let tex = toTeX(exprWithCursor);
 
-  // マーカーを青色の縦線（太字）に置換
-  tex = tex.replace(MARKER, '{\\color{#007aff}{\\mathbf{|}}}');
+  // カーソルを青色の細い縦線に置換（太字を解除してスッキリさせる）
+  tex = tex.replace(MARKER, '{\\color{#007aff}{|}}');
 
   display.innerHTML = `<span>$${tex}$</span>`;
 
@@ -45,10 +51,8 @@ function insert(value) {
 
 function deleteOne() {
   if (cursorIndex > 0) {
-    // べき乗やルートなどの特殊記号を考慮した削除
     const before = expression.slice(0, cursorIndex);
     const after = expression.slice(cursorIndex);
-    
     if (before.endsWith('ⁿ√')) {
         expression = before.slice(0, -2) + after;
         cursorIndex -= 2;
