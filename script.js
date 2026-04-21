@@ -11,6 +11,10 @@ function toTeX(expr) {
     .replace(/\*/g, "\\times ")
     .replace(/\//g, "\\div ")
     .replace(/%/g, "\\% ")
+    // --- 指数表記 (e+25 や e-10) を美しく変換 ---
+    // e+25 -> \times 10^{25}, e-10 -> \times 10^{-10} に変換します
+    .replace(/e\+?(-?\d+)/g, " \\times 10^{$1}") 
+    // ---------------------------------------
     .replace(/([\d.ᴥ]+)ⁿ√([\d.ᴥ]*)/g, "\\sqrt[$1]{$2}")
     .replace(/∛([\d.ᴥ]*)/g, "\\sqrt[3]{$1}")
     .replace(/√([\d.ᴥ]*)/g, "\\sqrt{$1}")
