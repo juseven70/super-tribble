@@ -4,11 +4,11 @@ const history = document.getElementById("history");
 let expression = "";
 let cursorIndex = 0;
 
-/* ===== 共通：TeX変換 ===== */
 function toTeX(expr) {
   return expr
     .replace(/\*/g, "\\times ")
-    .replace(/\//g, "\\div ");
+    .replace(/\//g, "\\div ")
+    .replace(/%/g, "\\% "); // % の変換を追加
 }
 
 function renderDisplay() {
@@ -85,6 +85,43 @@ function operator(op) {
     return;
   }
   renderDisplay();
+}
+
+// %ボタンの処理（直前が数字の時だけ入力可能）
+function insertPercent() {
+  const beforeText = expression.slice(0, cursorIndex);
+  if (/[\d.]$/.test(beforeText)) {
+    insert('%');
+  }
+}
+
+// +/- ボタンの処理（カーソル直前の数字の符号を反転させる）
+function toggleSign() {
+  const beforeText = expression.slice(0, cursorIndex);
+  const afterText = expression.slice(cursorIndex);
+  
+  // カーソル直前の「数字（マイナスが付いている場合も含む）」を探す
+  const match = beforeText.match(/(^|[+\-*/])(-?)([\d.]+)$/);
+  
+  if (match) {
+    const minus = match[2]; // "-" または "" (空文字)
+    const num = match[3];   // 数字部分
+    
+    // 置き換える文字数を計算
+    const replaceLength = minus.length + num.length;
+    const prefix = beforeText.slice(0, beforeText.length - replaceLength);
+    
+    if (minus === "-") {
+      // マイナスを外す
+      expression = prefix + num + afterText;
+      cursorIndex -= 1;
+    } else {
+      // マイナスを付ける
+      expression = prefix + "-" + num + afterText;
+      cursorIndex += 1;
+    }
+    renderDisplay();
+  }
 }
 
 function appendDot() {
