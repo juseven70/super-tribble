@@ -133,32 +133,26 @@ function appendDot() {
 }
 
 /* ===== 計算実行 ===== */
-/* ===== 計算実行（精度修正版） ===== */
 function calculate() {
   let expr = expression;
-  // 末尾に演算子がある場合は削除して計算
   if (/[+\-*/]$/.test(expr)) expr = expr.slice(0, -1);
   if (!expr) return;
 
   try {
-    // 1. 計算を実行
-    let result = eval(expr);
-
-    // 2. 小数点誤差を修正
-    // 12桁程度で丸めてから数値に戻すことで、末尾の「...9999」や「...0001」を取り除きます。
-    // parseFloatを使うと、丸めた後の余計な「0」も消してくれます。
+    // 【追加】「数字+%」を見つけたら「(数字/100)」に置き換える（例: 50% -> (50/100)）
+    let evalExpr = expr.replace(/([\d.]+)%/g, '($1/100)');
+    
+    let result = eval(evalExpr);
     result = parseFloat(result.toPrecision(12));
 
-    // 履歴に追加
     const line = document.createElement("div");
     line.innerHTML = `$${toTeX(expr)} = ${toTeX(String(result))}$`;
     history.appendChild(line);
     
     if (window.MathJax) MathJax.typesetPromise([line]);
 
-    // ディスプレイを更新
     expression = String(result);
-    cursorIndex = expression.length; // 計算後はカーソルを末尾へ
+    cursorIndex = expression.length;
     renderDisplay();
   } catch {
     expression = "Error";
