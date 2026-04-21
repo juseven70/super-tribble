@@ -2,9 +2,8 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TeX電卓</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>TeX関数電卓</title>
   <!-- MathJax -->
   <script>
     window.MathJax = {
@@ -13,7 +12,6 @@
     };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" defer></script>
-
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -28,7 +26,7 @@
       <div id="display"></div>
     </div>
 
-   <div class="buttons">
+    <div class="buttons">
       <!-- 1行目 -->
       <button onclick="insert('^2')" class="btn-func">x²</button>
       <button onclick="deleteOne()" class="btn-sub">⌫</button>
@@ -64,7 +62,7 @@
       <button onclick="appendDot()">.</button>
       <button class="equal" onclick="calculate()">＝</button>
 
-      <!-- 6行目 -->
+      <!-- 6行目：左右移動 -->
       <button onclick="insert('ⁿ√')" class="btn-func">ⁿ√x</button>
       <button onclick="moveCursor('left')" class="btn-nav">←</button>
       <button onclick="moveCursor('right')" class="btn-nav">→</button>
