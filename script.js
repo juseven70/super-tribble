@@ -33,10 +33,10 @@ function renderDisplay() {
   const exprWithCursor = expression.slice(0, cursorIndex) + MARKER + expression.slice(cursorIndex);
   let tex = toTeX(exprWithCursor);
 
-  // --- 修正ポイント：\! を追加して前後の隙間を消す ---
-  // \! は「少し左に詰める」というTeX命令です。
-  // これをカーソルの前後に置くことで、MathJaxが勝手に入れる隙間を打ち消します。
-  tex = tex.replace(MARKER, '\\!{\\color{#007aff}{|}}\\!');
+  // --- 修正ポイント：\kern を使ってカーソルの幅を完全に打ち消す ---
+  // 左右に -0.15em（文字サイズの15%分マイナス）の隙間を設定し、幅をゼロにします。
+  // （もし削りすぎたり足りなかったりした場合は、0.15 の数値を調整できます）
+  tex = tex.replace(MARKER, '\\kern-0.15em{\\color{#007aff}{|}}\\kern-0.15em');
 
   display.innerHTML = `<span>$${tex}$</span>`;
 
