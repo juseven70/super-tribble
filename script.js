@@ -56,7 +56,162 @@ function formatExact(str) {
 }
 
 // ==========================================
-// 計算実行 (モードに応じて処理を分岐)
+// 【自作】四元数 (Quaternion) コンパイラ＆エンジン
+// ==========================================
+class Q {
+  constructor(w, x, y, z) { this.w=w||0; this.x=x||0; this.y=y||0; this.z=z||0; }
+  add(q) { return new Q(this.w+q.w, this.x+q.x, this.y+q.y, this.z+q.z); }
+  sub(q) { return new Q(this.w-q.w, this.x-q.x, this.y-q.y, this.z-q.z); }
+  mul(q) {
+    return new Q(
+      this.w*q.w - this.x*q.x - this.y*q.y - this.z*q.z,
+      this.w*q.x + this.x*q.w + this.y*q.z - this.z*q.y,
+      this.w*q.y - this.x*q.z + this.y*q.w + this.z*q.x,
+      this.w*q.z + this.x*q.y - this.y*q.x + this.z*q.w
+    );
+  }
+  div(q) {
+    let n = q.w*q.w + q.x*q.x + q.y*q.y + q.z*q.z;
+    if(n === 0) throw "Div by 0";
+    return this.mul(new Q(q.w/n, -q.x/n, -q.y/n, -q.z/n));
+  }
+  norm() { return Math.sqrt(this.w*this.w + this.x*this.x + this.y*this.y + this.z*this.z); }
+  vNorm() { return Math.sqrt(this.x*this.x + this.y*this.y + this.z*this.z); }
+  ln() {
+    let n = this.norm(), vn = this.vNorm();
+    if(vn === 0) return new Q(Math.log(n), 0,0,0);
+    let angle = Math.acos(this.w / n);
+    return new Q(Math.log(n), this.x/vn*angle, this.y/vn*angle, this.z/vn*angle);
+  }
+  exp() {
+    let vn = this.vNorm(), expW = Math.exp(this.w);
+    if(vn === 0) return new Q(expW, 0,0,0);
+    let cosV = Math.cos(vn), sinV = Math.sin(vn);
+    return new Q(expW*cosV, expW*this.x/vn*sinV, expW*this.y/vn*sinV, expW*this.z/vn*sinV);
+  }
+  pow(q) {
+    if(this.norm() === 0) return new Q(0,0,0,0);
+    return this.ln().mul(q).exp(); // a^b = exp(ln(a)*b)
+  }
+}
+
+// 構文解析器 (Tokenizer & RPN Evaluator)
+function tokenize(expr) {
+  let tokens = [], i = 0, lastType = null;
+  function addMul() {
+    if (!lastType) return;
+    if (lastType==='NUM' || lastType==='VAR' || lastType==='RPAREN') tokens.push({type:'OP', val:'*'});
+  }
+  while(i < expr.length) {
+    let char = expr[i];
+    if (char === ' ' || char === 'ᴥ') { i++; continue; }
+    if (/[0-9.]/.test(char)) {
+      addMul();
+      let num = '';
+      while(i < expr.length && /[0-9.]/.test(expr[i])) num += expr[i++];
+      tokens.push({type:'NUM', val: parseFloat(num)});
+      lastType = 'NUM'; continue;
+    }
+    if (expr.slice(i).startsWith('log_{10}')) { addMul(); tokens.push({type:'FN', val:'log_{10}'}); i+=8; lastType='FN'; continue; }
+    if (expr.slice(i).startsWith('ln')) { addMul(); tokens.push({type:'FN', val:'ln'}); i+=2; lastType='FN'; continue; }
+    if (expr.slice(i).startsWith('ⁿ√')) { tokens.push({type:'OP', val:'ⁿ√'}); i+=2; lastType='OP'; continue; }
+    if (char==='√' || char==='∛') { addMul(); tokens.push({type:'FN', val:char}); i++; lastType='FN'; continue; }
+    if (/[ijkπe]/.test(char)) {
+      addMul();
+      tokens.push({type:'VAR', val: char === 'π' ? 'pi' : char});
+      lastType = 'VAR'; i++; continue;
+    }
+    if (/[+\-*/^]/.test(char)) {
+      if (char === '-' && (!lastType || lastType==='LPAREN' || lastType==='OP')) tokens.push({type:'UNARY', val:'-'});
+      else if (char !== '+') tokens.push({type:'OP', val:char});
+      lastType = 'OP'; i++; continue;
+    }
+    if (char === '(') { addMul(); tokens.push({type:'LPAREN', val:'('}); lastType = 'LPAREN'; i++; continue; }
+    if (char === ')') { tokens.push({type:'RPAREN', val:')'}); lastType = 'RPAREN'; i++; continue; }
+    i++;
+  }
+  return tokens;
+}
+
+function evaluateQ(expr) {
+  let tokens = tokenize(expr);
+  let output = [], stack = [];
+  const prec = {'+':1, '-':1, '*':2, '/':2, 'ⁿ√':3, '^':4, 'UNARY':5};
+  for(let t of tokens) {
+    if(t.type==='NUM' || t.type==='VAR') output.push(t);
+    else if(t.type==='FN' || t.type==='UNARY' || t.type==='LPAREN') stack.push(t);
+    else if(t.type==='OP') {
+      while(stack.length && stack[stack.length-1].type!=='LPAREN') {
+        let top = stack[stack.length-1];
+        if(top.type==='FN' || top.type==='UNARY' || prec[top.val] > prec[t.val] || (prec[top.val]===prec[t.val] && t.val!=='^')) output.push(stack.pop());
+        else break;
+      }
+      stack.push(t);
+    }
+    else if(t.type==='RPAREN') {
+      while(stack.length && stack[stack.length-1].type!=='LPAREN') output.push(stack.pop());
+      stack.pop();
+      if(stack.length && stack[stack.length-1].type==='FN') output.push(stack.pop());
+    }
+  }
+  while(stack.length) output.push(stack.pop());
+  
+  let evalStack = [];
+  for(let t of output) {
+    if(t.type==='NUM') evalStack.push(new Q(t.val,0,0,0));
+    else if(t.type==='VAR') {
+      if(t.val==='i') evalStack.push(new Q(0,1,0,0));
+      else if(t.val==='j') evalStack.push(new Q(0,0,1,0));
+      else if(t.val==='k') evalStack.push(new Q(0,0,0,1));
+      else if(t.val==='e') evalStack.push(new Q(Math.E,0,0,0));
+      else if(t.val==='pi') evalStack.push(new Q(Math.PI,0,0,0));
+    }
+    else if(t.type==='UNARY') { let a = evalStack.pop(); evalStack.push(new Q(-a.w, -a.x, -a.y, -a.z)); }
+    else if(t.type==='FN') {
+      let a = evalStack.pop();
+      if(t.val==='√') evalStack.push(a.pow(new Q(0.5)));
+      if(t.val==='∛') evalStack.push(a.pow(new Q(1/3)));
+      if(t.val==='ln') evalStack.push(a.ln());
+      if(t.val==='log_{10}') evalStack.push(a.ln().div(new Q(Math.LN10)));
+    }
+    else if(t.type==='OP') {
+      let b = evalStack.pop(), a = evalStack.pop();
+      if(t.val==='+') evalStack.push(a.add(b));
+      if(t.val==='-') evalStack.push(a.sub(b));
+      if(t.val==='*') evalStack.push(a.mul(b)); // ←ココ！四元数の非可換乗算が走る！
+      if(t.val==='/') evalStack.push(a.div(b));
+      if(t.val==='^') evalStack.push(a.pow(b));
+      if(t.val==='ⁿ√') evalStack.push(b.pow(new Q(1).div(a)));
+    }
+  }
+  return evalStack[0];
+}
+
+function formatQ(q) {
+  let p = [];
+  let w = Math.abs(q.w)<1e-10 ? 0 : q.w, x = Math.abs(q.x)<1e-10 ? 0 : q.x;
+  let y = Math.abs(q.y)<1e-10 ? 0 : q.y, z = Math.abs(q.z)<1e-10 ? 0 : q.z;
+  
+  if (w !== 0 || (x===0 && y===0 && z===0)) p.push(parseFloat(w.toPrecision(12)).toString());
+  
+  function fmt(val, sym) {
+    if (val === 0) return null;
+    let num = Math.abs(val) === 1 ? "" : parseFloat(Math.abs(val).toPrecision(12)).toString();
+    return { sign: val > 0 ? "+" : "-", str: num + sym };
+  }
+  
+  let terms = [fmt(x,'i'), fmt(y,'j'), fmt(z,'k')].filter(t => t);
+  let res = p.length > 0 ? p[0] : "";
+  
+  for(let t of terms) {
+    if (res === "") res = (t.sign === "-" ? "-" : "") + t.str;
+    else res += t.sign + t.str;
+  }
+  return res || "0";
+}
+
+// ==========================================
+// 【分岐】計算実行
 // ==========================================
 function calculate() {
   let expr = expression;
@@ -64,30 +219,34 @@ function calculate() {
   if (!expr) return;
 
   try {
-    let evalExpr = expr
-      .replace(/([\d.]+)%/g, '($1/100)')
-      .replace(/π/g, 'pi')
-      .replace(/([\d.]+)ⁿ√([\d.ie]+)/g, 'nthRoot($2, $1)')
-      .replace(/∛(-?[\d.ie]+)/g, 'cbrt($1)')
-      .replace(/√(-?[\d.ie]+)/g, 'sqrt($1)')
-      .replace(/ln\(/g, 'log(')
-      .replace(/log_\{10\}\(/g, 'log10(');
-
     let resultStr = "";
+    
+    // 式に j または k が含まれている場合は「自作の四元数エンジン」を発動！
+    if (expr.includes('j') || expr.includes('k')) {
+      let q = evaluateQ(expr);
+      resultStr = formatQ(q);
+    } 
+    // それ以外はこれまで通りの「math.js（S⇔D対応）」で計算
+    else {
+      let evalExpr = expr
+        .replace(/([\d.]+)%/g, '($1/100)')
+        .replace(/π/g, 'pi')
+        .replace(/([\d.]+)ⁿ√([\d.ie]+)/g, 'nthRoot($2, $1)')
+        .replace(/∛(-?[\d.ie]+)/g, 'cbrt($1)')
+        .replace(/√(-?[\d.ie]+)/g, 'sqrt($1)')
+        .replace(/ln\(/g, 'log(')
+        .replace(/log_\{10\}\(/g, 'log10(');
 
-    if (isExactMode) {
-      // 【記号モード】math.simplify を使って代数的に整理する
-      try {
-        let simplified = math.simplify(evalExpr);
-        resultStr = formatExact(simplified.toString());
-      } catch (e) {
-        // 対数など simplify で整理しきれないものは小数で出す
+      if (isExactMode) {
+        try {
+          let simplified = math.simplify(evalExpr);
+          resultStr = formatExact(simplified.toString());
+        } catch (e) {
+          resultStr = math.format(math.evaluate(evalExpr), { precision: 12 }).replace(/ /g, '');
+        }
+      } else {
         resultStr = math.format(math.evaluate(evalExpr), { precision: 12 }).replace(/ /g, '');
       }
-    } else {
-      // 【小数モード】これまで通り強制的に数値計算する
-      let result = math.evaluate(evalExpr);
-      resultStr = math.format(result, { precision: 12 }).replace(/ /g, '');
     }
 
     const line = document.createElement("div");
