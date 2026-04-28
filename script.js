@@ -211,7 +211,7 @@ function formatQ(q) {
 }
 
 // ==========================================
-// 【分岐】計算実行
+// 【分岐】計算実行（三段構えのハイブリッドエンジン）
 // ==========================================
 function calculate() {
   let expr = expression;
@@ -220,13 +220,45 @@ function calculate() {
 
   try {
     let resultStr = "";
+    let texResult = "";
     
-    // 式に j または k が含まれている場合は「自作の四元数エンジン」を発動！
+    // ① 式に j または k が含まれている場合は「自作の四元数エンジン」
     if (expr.includes('j') || expr.includes('k')) {
       let q = evaluateQ(expr);
       resultStr = formatQ(q);
+      texResult = toTeX(resultStr);
     } 
-    // それ以外はこれまで通りの「math.js（S⇔D対応）」で計算
+    // ② S⇔D（記号モード）がオンの場合は「Nerdamer」で代数計算！
+    else if (isExactMode) {
+      // Nerdamerが理解できる形に翻訳
+      let nExpr = expr
+        .replace(/([\d.]+)%/g, '($1/100)')
+        .replace(/π/g, 'pi')
+        .replace(/([\d.]+)ⁿ√([\d.ie]+)/g, '($2)^(1/$1)')
+        .replace(/∛(-?[\d.ie]+)/g, '($1)^(1/3)')
+        .replace(/√(-?[\d.ie]+)/g, 'sqrt($1)')
+        .replace(/ln\(/g, 'log(')
+        .replace(/log_\{10\}\(/g, 'log10(');
+
+      try {
+        let nResult = nerdamer(nExpr);
+        // 代数的に解いた結果の「美しいTeX表現（分数やルート）」を直接取得！
+        texResult = nResult.toTeX(); 
+        
+        // 次の計算に使うために、文字列を電卓の表示に戻す (例: 2*sqrt(2) -> 2×√2 )
+        resultStr = nResult.toString()
+          .replace(/\*/g, '×')
+          .replace(/sqrt\(([^)]+)\)/g, '√$1')
+          .replace(/pi/g, 'π');
+      } catch (e) {
+        // 対数などでNerdamerが処理しきれない特殊な場合は小数モードへ逃がす
+        let evalExpr = nExpr.replace(/nthRoot/g, 'sqrt'); // 簡易退避
+        let result = math.evaluate(evalExpr);
+        resultStr = math.format(result, { precision: 12 }).replace(/ /g, '');
+        texResult = toTeX(resultStr);
+      }
+    } 
+    // ③ オフ（小数モード）の場合はこれまで通り「math.js」で数値計算
     else {
       let evalExpr = expr
         .replace(/([\d.]+)%/g, '($1/100)')
@@ -237,20 +269,14 @@ function calculate() {
         .replace(/ln\(/g, 'log(')
         .replace(/log_\{10\}\(/g, 'log10(');
 
-      if (isExactMode) {
-        try {
-          let simplified = math.simplify(evalExpr);
-          resultStr = formatExact(simplified.toString());
-        } catch (e) {
-          resultStr = math.format(math.evaluate(evalExpr), { precision: 12 }).replace(/ /g, '');
-        }
-      } else {
-        resultStr = math.format(math.evaluate(evalExpr), { precision: 12 }).replace(/ /g, '');
-      }
+      let result = math.evaluate(evalExpr);
+      resultStr = math.format(result, { precision: 12 }).replace(/ /g, '');
+      texResult = toTeX(resultStr);
     }
 
+    // 履歴に計算結果を出力
     const line = document.createElement("div");
-    line.innerHTML = `$${toTeX(expr)} = ${toTeX(resultStr)}$`;
+    line.innerHTML = `$${toTeX(expr)} = ${texResult}$`;
     history.appendChild(line);
     if (window.MathJax) MathJax.typesetPromise([line]);
 
