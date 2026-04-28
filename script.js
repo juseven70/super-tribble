@@ -23,32 +23,39 @@ function toggleMode() {
 }
 
 // ==========================================
-// 計算結果のTeX表示を美しくする処理を追加
+// 表示用のTeX変換（隠れた掛け算を自動で消すように強化）
 // ==========================================
 function toTeX(expr) {
+  if (!expr) return "";
+  
   let tex = expr
     .replace(/\*/g, "\\times ")
     .replace(/\//g, "\\div ")
     .replace(/%/g, "\\% ")
-    .replace(/π/g, "\\pi ")
+    .replace(/pi/g, "\\pi ") // πの内部名を変換
+    .replace(/π/g, "\\pi ")  // 念のため記号も変換
     .replace(/e/g, "e ")
     .replace(/ln\(/g, "\\ln(")
     .replace(/log_\{10\}\(/g, "\\log_{10}(");
 
-  tex = tex.replace(/([\d.ᴥ]+)ⁿ√([\d.ᴥiπe]*)/g, "\\sqrt[$1]{$2}")
-           .replace(/∛(-?[\d.ᴥiπe]*)/g, "\\sqrt[3]{$1}")
-           .replace(/√(-?[\d.ᴥiπe]*)/g, "\\sqrt{$1}");
+  // ルート系の変換
+  tex = tex.replace(/([\d.ᴥ]+)ⁿ√([\d.ᴥijkπe]*)/g, "\\sqrt[$1]{$2}")
+           .replace(/∛(-?[\d.ᴥijkπe]*)/g, "\\sqrt[3]{$1}")
+           .replace(/√(-?[\d.ᴥijkπe]*)/g, "\\sqrt{$1}");
 
-  tex = tex.replace(/\^([\d.ᴥiπe]*)/g, "^{$1}");
+  // べき乗の変換
+  tex = tex.replace(/\^([\d.ᴥijkπe]*)/g, "^{$1}");
+  
+  // 指数表記の変換
   tex = tex.replace(/([\d.])e\+?(-?[\dᴥ]+)/g, "$1 \\times 10^{$2}");
 
-  // 【追加】2×π などを 2π と表示して美しくする魔法
-  tex = tex.replace(/\\times\s*\\pi/g, "\\pi ")
-           .replace(/\\times\s*e/g, "e ")
-           .replace(/\\times\s*\\sqrt/g, "\\sqrt");
+  // 【重要：美化】 数字と文字・括弧・ルートの間の「\times」を隠す (例: 2\times\pi -> 2\pi)
+  // これにより「2π」や「2\sqrt{2}」が実現します
+  tex = tex.replace(/(\d)\s*\\times\s*([a-z\\\(])/g, "$1$2");
 
   return tex;
 }
+
 
 // 記号モード用に計算結果の文字列を整える
 function formatExact(str) {
@@ -211,7 +218,7 @@ function formatQ(q) {
 }
 
 // ==========================================
-// 【分岐】計算実行（三段構えのハイブリッドエンジン）
+// 計算実行（内部データと見た目を完全に分離）
 // ==========================================
 function calculate() {
   let expr = expression;
@@ -219,18 +226,15 @@ function calculate() {
   if (!expr) return;
 
   try {
-    let resultStr = "";
-    let texResult = "";
+    let resultStr = ""; // 次の計算に使う用（2*pi）
+    let texResult = ""; // 履歴に表示する用（2\pi）
     
-    // ① 式に j または k が含まれている場合は「自作の四元数エンジン」
     if (expr.includes('j') || expr.includes('k')) {
       let q = evaluateQ(expr);
-      resultStr = formatQ(q);
+      resultStr = formatQ(q).replace(/ /g, '').replace(/×/g, '*'); // 内部用に戻す
       texResult = toTeX(resultStr);
     } 
-    // ② S⇔D（記号モード）がオンの場合は「Nerdamer」で代数計算！
     else if (isExactMode) {
-      // Nerdamerが理解できる形に翻訳
       let nExpr = expr
         .replace(/([\d.]+)%/g, '($1/100)')
         .replace(/π/g, 'pi')
@@ -240,25 +244,13 @@ function calculate() {
         .replace(/ln\(/g, 'log(')
         .replace(/log_\{10\}\(/g, 'log10(');
 
-      try {
-        let nResult = nerdamer(nExpr);
-        // 代数的に解いた結果の「美しいTeX表現（分数やルート）」を直接取得！
-        texResult = nResult.toTeX(); 
-        
-        // 次の計算に使うために、文字列を電卓の表示に戻す (例: 2*sqrt(2) -> 2×√2 )
-        resultStr = nResult.toString()
-          .replace(/\*/g, '×')
-          .replace(/sqrt\(([^)]+)\)/g, '√$1')
-          .replace(/pi/g, 'π');
-      } catch (e) {
-        // 対数などでNerdamerが処理しきれない特殊な場合は小数モードへ逃がす
-        let evalExpr = nExpr.replace(/nthRoot/g, 'sqrt'); // 簡易退避
-        let result = math.evaluate(evalExpr);
-        resultStr = math.format(result, { precision: 12 }).replace(/ /g, '');
-        texResult = toTeX(resultStr);
-      }
+      let nResult = nerdamer(nExpr);
+      
+      // 【重要】resultStrは「次も計算できる形式(2*pi)」で保存する
+      resultStr = nResult.toString(); 
+      // texResultはNerdamerの綺麗なTeXを使う
+      texResult = nResult.toTeX();
     } 
-    // ③ オフ（小数モード）の場合はこれまで通り「math.js」で数値計算
     else {
       let evalExpr = expr
         .replace(/([\d.]+)%/g, '($1/100)')
@@ -274,12 +266,13 @@ function calculate() {
       texResult = toTeX(resultStr);
     }
 
-    // 履歴に計算結果を出力
     const line = document.createElement("div");
+    // 左辺と右辺をそれぞれTeX化
     line.innerHTML = `$${toTeX(expr)} = ${texResult}$`;
     history.appendChild(line);
     if (window.MathJax) MathJax.typesetPromise([line]);
 
+    // 次の入力用に resultStr (2*pi形式) をセット
     expression = resultStr;
     cursorIndex = expression.length;
     renderDisplay();
