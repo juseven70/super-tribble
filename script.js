@@ -5,10 +5,7 @@ let expression = "";
 let cursorIndex = 0;
 const MARKER = 'ᴥ'; // カーソル位置計算用の内部マーカー
 
-// 表示用のTeX変換（順番を整理して衝突を防止）
-// 表示用のTeX変換（指数表記の表示崩れを完全に修正）
-// 表示用のTeX変換（πと虚数に対応）
-// 表示用のTeX変換（e、ln、log10 に対応）
+// 表示用のTeX変換
 function toTeX(expr) {
   let tex = expr
     .replace(/\*/g, "\\times ")
@@ -17,20 +14,55 @@ function toTeX(expr) {
     .replace(/π/g, "\\pi ")
     .replace(/e/g, "e ")
     .replace(/ln\(/g, "\\ln(")
-    .replace(/log_\{10\}\(/g, "\\log_{10}("); // 常用対数のTeX変換
+    .replace(/log_\{10\}\(/g, "\\log_{10}(");
 
-  // √の中にマイナスや記号が入っても屋根が伸びるように
+  // ルート系の変換（3乗根を復活）
   tex = tex.replace(/([\d.ᴥ]+)ⁿ√([\d.ᴥiπe]*)/g, "\\sqrt[$1]{$2}")
+           .replace(/∛(-?[\d.ᴥiπe]*)/g, "\\sqrt[3]{$1}")
            .replace(/√(-?[\d.ᴥiπe]*)/g, "\\sqrt{$1}");
 
-  // べき乗の変換
   tex = tex.replace(/\^([\d.ᴥiπe]*)/g, "^{$1}");
-  // 指数表記 (例: 1.2e+10 -> 1.2 \times 10^{10})
-  // ※ ネイピア数の 'e' と区別するため、直前に数字がある 'e' だけを指数とみなす
   tex = tex.replace(/([\d.])e\+?(-?[\dᴥ]+)/g, "$1 \\times 10^{$2}");
   return tex;
 }
 
+// 計算エンジン
+function calculate() {
+  let expr = expression;
+  if (/[+\-*/^√∛]$/.test(expr)) expr = expr.slice(0, -1);
+  if (!expr) return;
+
+  try {
+    let evalExpr = expr
+      .replace(/([\d.]+)%/g, '($1/100)')
+      .replace(/π/g, 'pi')
+      // 計算用の翻訳（3乗根を復活）
+      .replace(/([\d.]+)ⁿ√([\d.ie]+)/g, 'nthRoot($2, $1)')
+      .replace(/∛(-?[\d.ie]+)/g, 'cbrt($1)')
+      .replace(/√(-?[\d.ie]+)/g, 'sqrt($1)')
+      .replace(/ln\(/g, 'log(')
+      .replace(/log_\{10\}\(/g, 'log10(');
+
+    let result = math.evaluate(evalExpr);
+    
+    let resultStr = math.format(result, { precision: 12 });
+    resultStr = resultStr.replace(/ /g, '');
+
+    const line = document.createElement("div");
+    line.innerHTML = `$${toTeX(expr)} = ${toTeX(resultStr)}$`;
+    history.appendChild(line);
+    if (window.MathJax) MathJax.typesetPromise([line]);
+
+    expression = resultStr;
+    cursorIndex = expression.length;
+    renderDisplay();
+  } catch(e) {
+    console.log(e);
+    expression = "Error";
+    cursorIndex = 0;
+    renderDisplay();
+  }
+}
 // +/-ボタンの強化（ i や π の符号も反転できるように）
 function toggleSign() {
   const before = expression.slice(0, cursorIndex);
@@ -52,44 +84,6 @@ function toggleSign() {
   }
 }
 
-// 計算エンジンの入れ替え// 計算エンジンの入れ替え（math.jsの対数関数を呼び出す）
-function calculate() {
-  let expr = expression;
-  if (/[+\-*/^√]$/.test(expr)) expr = expr.slice(0, -1);
-  if (!expr) return;
-
-  try {
-    // 記号をmath.jsが理解できる形に翻訳
-    let evalExpr = expr
-      .replace(/([\d.]+)%/g, '($1/100)')
-      .replace(/π/g, 'pi')
-      // ネイピア数 e は math.js では 'e' で認識されます（ただし変数として扱うためそのまま）
-      .replace(/([\d.]+)ⁿ√([\d.ie]+)/g, 'nthRoot($2, $1)')
-      .replace(/√(-?[\d.ie]+)/g, 'sqrt($1)')
-      .replace(/ln\(/g, 'log(')         // math.js では log() が自然対数 (底がe)
-      .replace(/log_\{10\}\(/g, 'log10('); // 常用対数 (底が10)
-
-    // math.js で計算
-    let result = math.evaluate(evalExpr);
-    
-    let resultStr = math.format(result, { precision: 12 });
-    resultStr = resultStr.replace(/ /g, '');
-
-    const line = document.createElement("div");
-    line.innerHTML = `$${toTeX(expr)} = ${toTeX(resultStr)}$`;
-    history.appendChild(line);
-    if (window.MathJax) MathJax.typesetPromise([line]);
-
-    expression = resultStr;
-    cursorIndex = expression.length;
-    renderDisplay();
-  } catch(e) {
-    console.log(e);
-    expression = "Error";
-    cursorIndex = 0;
-    renderDisplay();
-  }
-}
 
 // キーボード & かな入力対応（一番下にあるやつです。i と p を追加）
 document.addEventListener('keydown', function(e) {
