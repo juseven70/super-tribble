@@ -112,7 +112,7 @@ button:active { background: #e5e5ea; }
 .btn-op, .equal { background: #007aff; color: #fff; }
 .btn-sub { background: #d1d1d6; }
 .btn-func { background: #e5e5ea; }
-.btn-nav { grid-column: span 2; background: #d1d1d6; }
+.btn-nav { background: #d1d1d6; }
 
 /* 数式内カーソルの点滅アニメーション */
 [fill="#007aff"], [color="#007aff"] {
