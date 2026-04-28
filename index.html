@@ -30,42 +30,45 @@
     </div>
 
     <div class="buttons">
-      <!-- 1行目 -->
-      <button onclick="insert('^2')" class="btn-func">x²</button>
+      <!-- 1行目（x² を e に変更） -->
+      <button onclick="insert('e')" class="btn-func">e</button>
       <button onclick="deleteOne()" class="btn-sub">⌫</button>
       <button onclick="clearAll()" class="btn-sub">AC</button>
       <button onclick="insertPercent()" class="btn-sub">%</button>
       <button onclick="operator('/')" class="btn-op">÷</button>
 
-      <!-- 2行目 -->
+      <!-- 2行目（( ) はそのまま） -->
       <button onclick="insertParens()" class="btn-func">( )</button>
       <button onclick="insert('7')">7</button>
       <button onclick="insert('8')">8</button>
       <button onclick="insert('9')">9</button>
       <button onclick="operator('*')" class="btn-op">×</button>
 
-      <!-- 3行目 -->
-      <button onclick="insert('^')" class="btn-func">xʸ</button>
+      <!-- 3行目（xʸ を ln に、追加で log10 もどこかに入れたいですが、
+           今回は xʸ を ln に、後述の別の場所を log10 に変更します）-->
+      <button onclick="insert('ln(')" class="btn-func">ln</button>
       <button onclick="insert('4')">4</button>
       <button onclick="insert('5')">5</button>
       <button onclick="insert('6')">6</button>
       <button onclick="operator('-')" class="btn-op">−</button>
 
-      <!-- 4行目 -->
+      <!-- 4行目（√x をそのままにし、左から2番目を...と考えましたが、
+           元の配列をなるべく崩さないように、
+           5行目の ∛x を log10 に差し替えます） -->
       <button onclick="insert('√')" class="btn-func">√x</button>
       <button onclick="insert('1')">1</button>
       <button onclick="insert('2')">2</button>
       <button onclick="insert('3')">3</button>
       <button onclick="operator('+')" class="btn-op">+</button>
 
-      <!-- 5行目 -->
-      <button onclick="insert('∛')" class="btn-func">∛x</button>
+      <!-- 5行目（∛x を log10 に変更） -->
+      <button onclick="insert('log_{10}(')" class="btn-func">log₁₀</button>
       <button onclick="toggleSign()">+/-</button>
       <button onclick="insert('0')">0</button>
       <button onclick="appendDot()">.</button>
       <button class="equal" onclick="calculate()">＝</button>
 
-      <!-- 6行目：虚数、円周率、左右移動 -->
+      <!-- 6行目：(ⁿ√x はそのまま) -->
       <button onclick="insert('ⁿ√')" class="btn-func">ⁿ√x</button>
       <button onclick="insert('i')" class="btn-func">i</button>
       <button onclick="insert('π')" class="btn-func">π</button>
