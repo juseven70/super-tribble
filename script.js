@@ -407,6 +407,8 @@ document.addEventListener('keydown', function(e) {
   else if (k === 'ArrowLeft') moveCursor('left');
   else if (k === 'ArrowRight') moveCursor('right');
   else if (k === 'i') insert('i'); 
+  else if (k === 'j') insert('j'); // 追加！
+  else if (k === 'k') insert('k'); // 追加！
   else if (k === 'p') insert('π'); 
-  else if (k === 'e') insert('e'); // キーボードの e でネイピア数
+  else if (k === 'e') insert('e'); 
 });
