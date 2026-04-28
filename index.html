@@ -33,9 +33,9 @@
       <!-- 1行目 -->
       <button onclick="insert('^2')" class="btn-func">x²</button>
       <button onclick="insert('√')" class="btn-func">√x</button>
+      <button onclick="toggleMode()" id="modeBtn" class="btn-sub" style="font-size: 18px;">S⇔D</button>
       <button onclick="deleteOne()" class="btn-sub">⌫</button>
       <button onclick="clearAll()" class="btn-sub">AC</button>
-      <button onclick="insertPercent()" class="btn-sub">%</button>
       <button onclick="operator('/')" class="btn-op">÷</button>
 
       <!-- 2行目 -->
@@ -46,7 +46,7 @@
       <button onclick="insert('9')">9</button>
       <button onclick="operator('*')" class="btn-op">×</button>
 
-      <!-- 3行目 -->
+      <!-- 3行目（ここでバグが起きていたのを直しました！） -->
       <button onclick="insert('^')" class="btn-func">xʸ</button>
       <button onclick="insert('ⁿ√')" class="btn-func">ⁿ√x</button>
       <button onclick="insert('4')">4</button>
@@ -73,6 +73,7 @@
       <!-- 6行目 -->
       <button onclick="insert('i')" class="btn-func">i</button>
       <button onclick="insertParens()" class="btn-func">( )</button>
+      <button onclick="insertPercent()" class="btn-func">%</button>
       <button onclick="moveCursor('left')" class="btn-nav">←</button>
       <button onclick="moveCursor('right')" class="btn-nav">→</button>
     </div>
