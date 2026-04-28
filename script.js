@@ -180,6 +180,13 @@ function insertPercent() {
   if (/[\d.]$/.test(expression.slice(0, cursorIndex))) insert('%');
 }
 
+// 括弧を出力し、カーソルを内側に移動させる魔法
+function insertParens() {
+  expression = expression.slice(0, cursorIndex) + "()" + expression.slice(cursorIndex);
+  cursorIndex += 1; // 1文字分だけ右に進む（＝括弧の内側に入る）
+  renderDisplay();
+}
+
 // キーボード & かな入力対応
 document.addEventListener('keydown', function(e) {
   let k = e.key;
