@@ -23,39 +23,40 @@ function toggleMode() {
 }
 
 // ==========================================
-// 表示用のTeX変換（隠れた掛け算を自動で消すように強化）
+// 表示用のTeX変換（掛け算記号を賢く隠す版）
 // ==========================================
 function toTeX(expr) {
   if (!expr) return "";
-  
+
   let tex = expr
     .replace(/\*/g, "\\times ")
     .replace(/\//g, "\\div ")
     .replace(/%/g, "\\% ")
-    .replace(/pi/g, "\\pi ") // πの内部名を変換
-    .replace(/π/g, "\\pi ")  // 念のため記号も変換
+    .replace(/pi/g, "\\pi ")
+    .replace(/π/g, "\\pi ")
     .replace(/e/g, "e ")
     .replace(/ln\(/g, "\\ln(")
     .replace(/log_\{10\}\(/g, "\\log_{10}(");
 
-  // ルート系の変換
+  // ルート・累乗の変換
   tex = tex.replace(/([\d.ᴥ]+)ⁿ√([\d.ᴥijkπe]*)/g, "\\sqrt[$1]{$2}")
            .replace(/∛(-?[\d.ᴥijkπe]*)/g, "\\sqrt[3]{$1}")
            .replace(/√(-?[\d.ᴥijkπe]*)/g, "\\sqrt{$1}");
-
-  // べき乗の変換
   tex = tex.replace(/\^([\d.ᴥijkπe]*)/g, "^{$1}");
   
-  // 指数表記の変換
+  // 指数表記 (1.2 \times 10^{25})
   tex = tex.replace(/([\d.])e\+?(-?[\dᴥ]+)/g, "$1 \\times 10^{$2}");
 
-  // 【重要：美化】 数字と文字・括弧・ルートの間の「\times」を隠す (例: 2\times\pi -> 2\pi)
-  // これにより「2π」や「2\sqrt{2}」が実現します
-  tex = tex.replace(/(\d)\s*\\times\s*([a-z\\\(])/g, "$1$2");
+  // 【ここが重要：掛け算を隠す最強の正規表現】
+  // 1. [数字] \times [文字・コマンド・括弧・カーソル] の \times を消す
+  tex = tex.replace(/(\d)\s*\\times\s*([a-z\\\(ᴥ])/g, "$1$2");
+  
+  // 2. [文字・閉じ括弧・カーソル] \times [数字・文字・コマンド・開き括弧・カーソル] の \times を消す
+  // これで ij や 2(3) や (2)π や iᴥ などの間の \times が消えます
+  tex = tex.replace(/([a-zᴥ\)])\s*\\times\s*([\d\\a-z\(ᴥ])/g, "$1$2");
 
   return tex;
 }
-
 
 // 記号モード用に計算結果の文字列を整える
 function formatExact(str) {
