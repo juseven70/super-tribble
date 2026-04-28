@@ -33,8 +33,10 @@ function renderDisplay() {
   const exprWithCursor = expression.slice(0, cursorIndex) + MARKER + expression.slice(cursorIndex);
   let tex = toTeX(exprWithCursor);
 
-  // カーソルを青色の細い縦線に置換（太字を解除してスッキリさせる）
-  tex = tex.replace(MARKER, '{\\color{#007aff}{|}}');
+  // --- 修正ポイント：\! を追加して前後の隙間を消す ---
+  // \! は「少し左に詰める」というTeX命令です。
+  // これをカーソルの前後に置くことで、MathJaxが勝手に入れる隙間を打ち消します。
+  tex = tex.replace(MARKER, '\\!{\\color{#007aff}{|}}\\!');
 
   display.innerHTML = `<span>$${tex}$</span>`;
 
