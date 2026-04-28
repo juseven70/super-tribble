@@ -127,10 +127,16 @@ button:active { background: #e5e5ea; }
 .btn-op, .equal { background: #007aff; color: #fff; }
 .btn-sub { background: #d1d1d6; }
 .btn-func { background: #e5e5ea; }
+/* 移動ボタン（レイアウト調整） */
 .btn-nav {
-  grid-column: span 2;
   background: #d1d1d6;
   color: #000;
+  grid-column: span 1; /* ←は通常サイズ(1マス) */
+}
+
+/* 右矢印(→)だけ2マス分使って隙間を埋める */
+button[onclick="moveCursor('right')"] {
+  grid-column: span 2;
 }
 
 /* 数式内カーソルの点滅アニメーション */
