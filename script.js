@@ -8,20 +8,26 @@ const MARKER = 'ᴥ'; // カーソル位置計算用の内部マーカー
 // 表示用のTeX変換（順番を整理して衝突を防止）
 // 表示用のTeX変換（指数表記の表示崩れを完全に修正）
 // 表示用のTeX変換（πと虚数に対応）
+// 表示用のTeX変換（e、ln、log10 に対応）
 function toTeX(expr) {
   let tex = expr
     .replace(/\*/g, "\\times ")
     .replace(/\//g, "\\div ")
     .replace(/%/g, "\\% ")
-    .replace(/π/g, "\\pi "); // πを綺麗なTeX記号に
+    .replace(/π/g, "\\pi ")
+    .replace(/e/g, "e ")
+    .replace(/ln\(/g, "\\ln(")
+    .replace(/log_\{10\}\(/g, "\\log_{10}("); // 常用対数のTeX変換
 
-  // √の中にマイナスや i、π が入っても屋根が伸びるように強化
-  tex = tex.replace(/([\d.ᴥ]+)ⁿ√([\d.ᴥiπ]*)/g, "\\sqrt[$1]{$2}")
-           .replace(/∛([\d.ᴥiπ]*)/g, "\\sqrt[3]{$1}")
-           .replace(/√(-?[\d.ᴥiπ]*)/g, "\\sqrt{$1}");
+  // √の中にマイナスや記号が入っても屋根が伸びるように
+  tex = tex.replace(/([\d.ᴥ]+)ⁿ√([\d.ᴥiπe]*)/g, "\\sqrt[$1]{$2}")
+           .replace(/√(-?[\d.ᴥiπe]*)/g, "\\sqrt{$1}");
 
-  tex = tex.replace(/\^([\d.ᴥiπ]*)/g, "^{$1}");
-  tex = tex.replace(/e\+?(-?[\dᴥ]+)/g, " \\times 10^{$1}");
+  // べき乗の変換
+  tex = tex.replace(/\^([\d.ᴥiπe]*)/g, "^{$1}");
+  // 指数表記 (例: 1.2e+10 -> 1.2 \times 10^{10})
+  // ※ ネイピア数の 'e' と区別するため、直前に数字がある 'e' だけを指数とみなす
+  tex = tex.replace(/([\d.])e\+?(-?[\dᴥ]+)/g, "$1 \\times 10^{$2}");
   return tex;
 }
 
@@ -46,10 +52,10 @@ function toggleSign() {
   }
 }
 
-// 計算エンジンの入れ替え
+// 計算エンジンの入れ替え// 計算エンジンの入れ替え（math.jsの対数関数を呼び出す）
 function calculate() {
   let expr = expression;
-  if (/[+\-*/^√∛]$/.test(expr)) expr = expr.slice(0, -1);
+  if (/[+\-*/^√]$/.test(expr)) expr = expr.slice(0, -1);
   if (!expr) return;
 
   try {
@@ -57,17 +63,16 @@ function calculate() {
     let evalExpr = expr
       .replace(/([\d.]+)%/g, '($1/100)')
       .replace(/π/g, 'pi')
-      .replace(/([\d.]+)ⁿ√([\d.i]+)/g, 'nthRoot($2, $1)')
-      .replace(/∛([\d.i]+)/g, 'cbrt($1)')
-      .replace(/√(-?[\d.i]+)/g, 'sqrt($1)'); // √-9 のようなマイナスも許容
+      // ネイピア数 e は math.js では 'e' で認識されます（ただし変数として扱うためそのまま）
+      .replace(/([\d.]+)ⁿ√([\d.ie]+)/g, 'nthRoot($2, $1)')
+      .replace(/√(-?[\d.ie]+)/g, 'sqrt($1)')
+      .replace(/ln\(/g, 'log(')         // math.js では log() が自然対数 (底がe)
+      .replace(/log_\{10\}\(/g, 'log10('); // 常用対数 (底が10)
 
-    // 【魔法】JavaScript標準のevalではなく、math.jsのevaluateを使う！
+    // math.js で計算
     let result = math.evaluate(evalExpr);
     
-    // 計算結果を文字列に変換（複素数も "3 + 4i" のように自動フォーマットされます）
     let resultStr = math.format(result, { precision: 12 });
-    
-    // 結果のスペースを詰める (例: "3 + 4i" -> "3+4i")
     resultStr = resultStr.replace(/ /g, '');
 
     const line = document.createElement("div");
@@ -187,16 +192,17 @@ function insertParens() {
   renderDisplay();
 }
 
-// キーボード & かな入力対応
+// キーボード & かな入力対応（'e' を追加）
 document.addEventListener('keydown', function(e) {
   let k = e.key;
-  k = k.replace(/[０-９．＋－＊／＝％ｉｐ（）]/g, s => String.fromCharCode(s.charCodeAt(0)-0xFEE0));
+  // 全角英数を半角に変換する処理に 'ｅ' (全角のe) を追加
+  k = k.replace(/[０-９．＋－＊／＝％ｉｐｅ（）]/g, s => String.fromCharCode(s.charCodeAt(0)-0xFEE0));
   const map = {'ー':'-','−':'-','×':'*','÷':'/','。':'.','、':'.','・':'/'};
   if (map[k]) k = map[k];
 
   if (/^[0-9]$/.test(k)) insert(k);
   else if (/[+\-*/^]/.test(k)) operator(k);
-  else if (k === '(' || k === ')') insert(k); // ←【追加】キーボードの括弧対応
+  else if (k === '(' || k === ')') insert(k);
   else if (k === '.') appendDot();
   else if (k === 'Enter' || k === '=') { e.preventDefault(); calculate(); }
   else if (k === 'Backspace') deleteOne();
@@ -206,4 +212,5 @@ document.addEventListener('keydown', function(e) {
   else if (k === 'ArrowRight') moveCursor('right');
   else if (k === 'i') insert('i'); 
   else if (k === 'p') insert('π'); 
+  else if (k === 'e') insert('e'); // キーボードの e でネイピア数
 });
