@@ -7,26 +7,104 @@ const MARKER = 'ᴥ'; // カーソル位置計算用の内部マーカー
 
 // 表示用のTeX変換（順番を整理して衝突を防止）
 // 表示用のTeX変換（指数表記の表示崩れを完全に修正）
+// 表示用のTeX変換（πと虚数に対応）
 function toTeX(expr) {
   let tex = expr
     .replace(/\*/g, "\\times ")
     .replace(/\//g, "\\div ")
-    .replace(/%/g, "\\% ");
+    .replace(/%/g, "\\% ")
+    .replace(/π/g, "\\pi "); // πを綺麗なTeX記号に
 
-  // 1. ルート系を先に変換
-  tex = tex.replace(/([\d.ᴥ]+)ⁿ√([\d.ᴥ]*)/g, "\\sqrt[$1]{$2}")
-           .replace(/∛([\d.ᴥ]*)/g, "\\sqrt[3]{$1}")
-           .replace(/√([\d.ᴥ]*)/g, "\\sqrt{$1}");
+  // √の中にマイナスや i、π が入っても屋根が伸びるように強化
+  tex = tex.replace(/([\d.ᴥ]+)ⁿ√([\d.ᴥiπ]*)/g, "\\sqrt[$1]{$2}")
+           .replace(/∛([\d.ᴥiπ]*)/g, "\\sqrt[3]{$1}")
+           .replace(/√(-?[\d.ᴥiπ]*)/g, "\\sqrt{$1}");
 
-  // 2. べき乗 (^) を変換
-  tex = tex.replace(/\^([\d.ᴥ]*)/g, "^{$1}");
-
-  // 3. 【重要修正】指数表記 (e+99) を 10^{99} に変換
-  // ^ を付け忘れていたのを修正し、カーソルマーカー(ᴥ)が含まれていても反応するようにしました
+  tex = tex.replace(/\^([\d.ᴥiπ]*)/g, "^{$1}");
   tex = tex.replace(/e\+?(-?[\dᴥ]+)/g, " \\times 10^{$1}");
-
   return tex;
 }
+
+// +/-ボタンの強化（ i や π の符号も反転できるように）
+function toggleSign() {
+  const before = expression.slice(0, cursorIndex);
+  const after = expression.slice(cursorIndex);
+  const match = before.match(/(^|[+\-*/])(-?)([\d.]*i?|π)$/);
+  if (match) {
+    const minus = match[2];
+    const num = match[3];
+    if (!num && minus === "") return;
+    const prefix = before.slice(0, before.length - (minus.length + num.length));
+    if (minus === "-") {
+      expression = prefix + num + after;
+      cursorIndex--;
+    } else {
+      expression = prefix + "-" + num + after;
+      cursorIndex++;
+    }
+    renderDisplay();
+  }
+}
+
+// 計算エンジンの入れ替え
+function calculate() {
+  let expr = expression;
+  if (/[+\-*/^√∛]$/.test(expr)) expr = expr.slice(0, -1);
+  if (!expr) return;
+
+  try {
+    // 記号をmath.jsが理解できる形に翻訳
+    let evalExpr = expr
+      .replace(/([\d.]+)%/g, '($1/100)')
+      .replace(/π/g, 'pi')
+      .replace(/([\d.]+)ⁿ√([\d.i]+)/g, 'nthRoot($2, $1)')
+      .replace(/∛([\d.i]+)/g, 'cbrt($1)')
+      .replace(/√(-?[\d.i]+)/g, 'sqrt($1)'); // √-9 のようなマイナスも許容
+
+    // 【魔法】JavaScript標準のevalではなく、math.jsのevaluateを使う！
+    let result = math.evaluate(evalExpr);
+    
+    // 計算結果を文字列に変換（複素数も "3 + 4i" のように自動フォーマットされます）
+    let resultStr = math.format(result, { precision: 12 });
+    
+    // 結果のスペースを詰める (例: "3 + 4i" -> "3+4i")
+    resultStr = resultStr.replace(/ /g, '');
+
+    const line = document.createElement("div");
+    line.innerHTML = `$${toTeX(expr)} = ${toTeX(resultStr)}$`;
+    history.appendChild(line);
+    if (window.MathJax) MathJax.typesetPromise([line]);
+
+    expression = resultStr;
+    cursorIndex = expression.length;
+    renderDisplay();
+  } catch(e) {
+    console.log(e);
+    expression = "Error";
+    cursorIndex = 0;
+    renderDisplay();
+  }
+}
+
+// キーボード & かな入力対応（一番下にあるやつです。i と p を追加）
+document.addEventListener('keydown', function(e) {
+  let k = e.key;
+  k = k.replace(/[０-９．＋－＊／＝％ｉｐ]/g, s => String.fromCharCode(s.charCodeAt(0)-0xFEE0));
+  const map = {'ー':'-','−':'-','×':'*','÷':'/','。':'.','、':'.','・':'/'};
+  if (map[k]) k = map[k];
+
+  if (/^[0-9]$/.test(k)) insert(k);
+  else if (/[+\-*/^]/.test(k)) operator(k);
+  else if (k === '.') appendDot();
+  else if (k === 'Enter' || k === '=') { e.preventDefault(); calculate(); }
+  else if (k === 'Backspace') deleteOne();
+  else if (k === 'Escape') clearAll();
+  else if (k === '%') insertPercent();
+  else if (k === 'ArrowLeft') moveCursor('left');
+  else if (k === 'ArrowRight') moveCursor('right');
+  else if (k === 'i') insert('i'); // キーボードの i で虚数
+  else if (k === 'p') insert('π'); // キーボードの p で円周率
+});
 
 // 画面描画
 function renderDisplay() {
@@ -100,56 +178,6 @@ function appendDot() {
 
 function insertPercent() {
   if (/[\d.]$/.test(expression.slice(0, cursorIndex))) insert('%');
-}
-
-function toggleSign() {
-  const before = expression.slice(0, cursorIndex);
-  const after = expression.slice(cursorIndex);
-  const match = before.match(/(^|[+\-*/])(-?)([\d.]+)$/);
-  if (match) {
-    const minus = match[2];
-    const num = match[3];
-    const prefix = before.slice(0, before.length - (minus.length + num.length));
-    if (minus === "-") {
-      expression = prefix + num + after;
-      cursorIndex--;
-    } else {
-      expression = prefix + "-" + num + after;
-      cursorIndex++;
-    }
-    renderDisplay();
-  }
-}
-
-function calculate() {
-  let expr = expression;
-  if (/[+\-*/^√∛]$/.test(expr)) expr = expr.slice(0, -1);
-  if (!expr) return;
-
-  try {
-    let evalExpr = expr
-      .replace(/([\d.]+)%/g, '($1/100)')
-      .replace(/([\d.]+)ⁿ√([\d.]+)/g, 'Math.pow($2, 1/$1)')
-      .replace(/∛([\d.]+)/g, 'Math.cbrt($1)')
-      .replace(/√([\d.]+)/g, 'Math.sqrt($1)')
-      .replace(/\^/g, '**');
-    
-    let result = eval(evalExpr);
-    result = parseFloat(result.toPrecision(12));
-
-    const line = document.createElement("div");
-    line.innerHTML = `$${toTeX(expr)} = ${toTeX(String(result))}$`;
-    history.appendChild(line);
-    if (window.MathJax) MathJax.typesetPromise([line]);
-
-    expression = String(result);
-    cursorIndex = expression.length;
-    renderDisplay();
-  } catch {
-    expression = "Error";
-    cursorIndex = 0;
-    renderDisplay();
-  }
 }
 
 // キーボード & かな入力対応
