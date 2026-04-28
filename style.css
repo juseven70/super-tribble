@@ -134,11 +134,6 @@ button:active { background: #e5e5ea; }
   grid-column: span 1; /* ←は通常サイズ(1マス) */
 }
 
-/* 右矢印(→)だけ2マス分使って隙間を埋める */
-button[onclick="moveCursor('right')"] {
-  grid-column: span 2;
-}
-
 /* 数式内カーソルの点滅アニメーション */
 [fill="#007aff"], [color="#007aff"] {
   animation: blink 1s step-end infinite;
