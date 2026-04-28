@@ -78,41 +78,60 @@ body {
 #display::-webkit-scrollbar { display: none; }
 #display { -ms-overflow-style: none; scrollbar-width: none; }
 
+/* ボタンエリア（5列から6列に変更） */
 .buttons {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   grid-template-rows: repeat(6, 1fr);
   gap: 8px;
 }
 
+/* ボタンの基本スタイル */
 button {
   width: 100%;
   height: 100%;
-  min-height: 0;
-  /* iPad連打対策・ラグ解消 */
+  min-height: 0; /* iPad画面縮小時の潰れを許可 */
+  
+  /* iPad連打対策・ラグ解消の魔法 */
   touch-action: manipulation;
   user-select: none;
   -webkit-user-select: none;
-  font-size: 20px;
+  
+  font-size: 20px; /* 6列にして横幅が狭くなったので文字を少し小さく */
   font-weight: 500;
   border-radius: 12px;
   border: none;
   background: #ffffff;
   color: #000;
   cursor: pointer;
-  transition: background 0.1s;
+  
+  /* 押したときのアニメーション */
+  transition: background 0.1s, transform 0.05s;
+  
+  /* 中の文字を上下左右の中央に配置 */
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
+/* ボタンを押した瞬間のへこむ挙動 */
+button:active {
+  background: #e5e5ea;
+  transform: scale(0.98);
+}
+
 
 button:active { background: #e5e5ea; }
 
 .btn-op, .equal { background: #007aff; color: #fff; }
 .btn-sub { background: #d1d1d6; }
 .btn-func { background: #e5e5ea; }
-.btn-nav { background: #d1d1d6; }
+.btn-nav {
+  grid-column: span 2;
+  background: #d1d1d6;
+  color: #000;
+}
 
 /* 数式内カーソルの点滅アニメーション */
 [fill="#007aff"], [color="#007aff"] {
