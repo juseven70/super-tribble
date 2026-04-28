@@ -190,12 +190,13 @@ function insertParens() {
 // キーボード & かな入力対応
 document.addEventListener('keydown', function(e) {
   let k = e.key;
-  k = k.replace(/[０-９．＋－＊／＝％]/g, s => String.fromCharCode(s.charCodeAt(0)-0xFEE0));
+  k = k.replace(/[０-９．＋－＊／＝％ｉｐ（）]/g, s => String.fromCharCode(s.charCodeAt(0)-0xFEE0));
   const map = {'ー':'-','−':'-','×':'*','÷':'/','。':'.','、':'.','・':'/'};
   if (map[k]) k = map[k];
 
   if (/^[0-9]$/.test(k)) insert(k);
   else if (/[+\-*/^]/.test(k)) operator(k);
+  else if (k === '(' || k === ')') insert(k); // ←【追加】キーボードの括弧対応
   else if (k === '.') appendDot();
   else if (k === 'Enter' || k === '=') { e.preventDefault(); calculate(); }
   else if (k === 'Backspace') deleteOne();
@@ -203,6 +204,6 @@ document.addEventListener('keydown', function(e) {
   else if (k === '%') insertPercent();
   else if (k === 'ArrowLeft') moveCursor('left');
   else if (k === 'ArrowRight') moveCursor('right');
+  else if (k === 'i') insert('i'); 
+  else if (k === 'p') insert('π'); 
 });
-
-renderDisplay();
