@@ -5,7 +5,26 @@ let expression = "";
 let cursorIndex = 0;
 const MARKER = 'ᴥ'; // カーソル位置計算用の内部マーカー
 
-// 表示用のTeX変換
+// ==========================================
+// S⇔D (小数/記号) モードの切り替え
+// ==========================================
+let isExactMode = false; // デフォルトは小数モード
+
+function toggleMode() {
+  isExactMode = !isExactMode;
+  const btn = document.getElementById("modeBtn");
+  if (isExactMode) {
+    btn.style.background = "#34c759"; // オン(記号モード)の時は緑色に光る
+    btn.style.color = "#fff";
+  } else {
+    btn.style.background = "#d1d1d6"; // オフ(小数モード)の時は元のグレー
+    btn.style.color = "#000";
+  }
+}
+
+// ==========================================
+// 計算結果のTeX表示を美しくする処理を追加
+// ==========================================
 function toTeX(expr) {
   let tex = expr
     .replace(/\*/g, "\\times ")
@@ -16,17 +35,29 @@ function toTeX(expr) {
     .replace(/ln\(/g, "\\ln(")
     .replace(/log_\{10\}\(/g, "\\log_{10}(");
 
-  // ルート系の変換（3乗根を復活）
   tex = tex.replace(/([\d.ᴥ]+)ⁿ√([\d.ᴥiπe]*)/g, "\\sqrt[$1]{$2}")
            .replace(/∛(-?[\d.ᴥiπe]*)/g, "\\sqrt[3]{$1}")
            .replace(/√(-?[\d.ᴥiπe]*)/g, "\\sqrt{$1}");
 
   tex = tex.replace(/\^([\d.ᴥiπe]*)/g, "^{$1}");
   tex = tex.replace(/([\d.])e\+?(-?[\dᴥ]+)/g, "$1 \\times 10^{$2}");
+
+  // 【追加】2×π などを 2π と表示して美しくする魔法
+  tex = tex.replace(/\\times\s*\\pi/g, "\\pi ")
+           .replace(/\\times\s*e/g, "e ")
+           .replace(/\\times\s*\\sqrt/g, "\\sqrt");
+
   return tex;
 }
 
-// 計算エンジン
+// 記号モード用に計算結果の文字列を整える
+function formatExact(str) {
+  return str.replace(/ /g, '').replace(/\*/g, '×').replace(/pi/g, 'π').replace(/sqrt\(/g, '√(');
+}
+
+// ==========================================
+// 計算実行 (モードに応じて処理を分岐)
+// ==========================================
 function calculate() {
   let expr = expression;
   if (/[+\-*/^√∛]$/.test(expr)) expr = expr.slice(0, -1);
@@ -36,17 +67,28 @@ function calculate() {
     let evalExpr = expr
       .replace(/([\d.]+)%/g, '($1/100)')
       .replace(/π/g, 'pi')
-      // 計算用の翻訳（3乗根を復活）
       .replace(/([\d.]+)ⁿ√([\d.ie]+)/g, 'nthRoot($2, $1)')
       .replace(/∛(-?[\d.ie]+)/g, 'cbrt($1)')
       .replace(/√(-?[\d.ie]+)/g, 'sqrt($1)')
       .replace(/ln\(/g, 'log(')
       .replace(/log_\{10\}\(/g, 'log10(');
 
-    let result = math.evaluate(evalExpr);
-    
-    let resultStr = math.format(result, { precision: 12 });
-    resultStr = resultStr.replace(/ /g, '');
+    let resultStr = "";
+
+    if (isExactMode) {
+      // 【記号モード】math.simplify を使って代数的に整理する
+      try {
+        let simplified = math.simplify(evalExpr);
+        resultStr = formatExact(simplified.toString());
+      } catch (e) {
+        // 対数など simplify で整理しきれないものは小数で出す
+        resultStr = math.format(math.evaluate(evalExpr), { precision: 12 }).replace(/ /g, '');
+      }
+    } else {
+      // 【小数モード】これまで通り強制的に数値計算する
+      let result = math.evaluate(evalExpr);
+      resultStr = math.format(result, { precision: 12 }).replace(/ /g, '');
+    }
 
     const line = document.createElement("div");
     line.innerHTML = `$${toTeX(expr)} = ${toTeX(resultStr)}$`;
@@ -63,6 +105,7 @@ function calculate() {
     renderDisplay();
   }
 }
+
 // +/-ボタンの強化（ i や π の符号も反転できるように）
 function toggleSign() {
   const before = expression.slice(0, cursorIndex);
