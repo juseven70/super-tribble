@@ -270,11 +270,20 @@ function calculate() {
       texResult = toTeX(resultStr);
     }
 
+  
     const line = document.createElement("div");
-    // 左辺と右辺をそれぞれTeX化
     line.innerHTML = `$${toTeX(expr)} = ${texResult}$`;
-    history.appendChild(line);
-    if (window.MathJax) MathJax.typesetPromise([line]);
+    
+    if (window.MathJax) {
+      mathjaxQueue = mathjaxQueue.then(() => {
+        return MathJax.typesetPromise([line]).then(() => {
+          history.appendChild(line);
+          history.scrollTop = history.scrollHeight; // ついでに履歴を一番下まで自動スクロール！
+        });
+      });
+    } else {
+      history.appendChild(line);
+    }
 
     // 次の入力用に resultStr (2*pi形式) をセット
     expression = resultStr;
