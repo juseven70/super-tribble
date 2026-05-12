@@ -4,6 +4,7 @@ const history = document.getElementById("history");
 let expression = "";
 let cursorIndex = 0;
 const MARKER = 'ᴥ'; // カーソル位置計算用の内部マーカー
+let mathjaxQueue = Promise.resolve();
 
 // ==========================================
 // S⇔D (小数/記号) モードの切り替え
