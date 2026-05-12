@@ -5,6 +5,8 @@ let expression = "";
 let cursorIndex = 0;
 const MARKER = 'ᴥ'; // カーソル位置計算用の内部マーカー
 
+let mathjaxQueue = Promise.resolve();
+
 // ==========================================
 // S⇔D (小数/記号) モードの切り替え
 // ==========================================
@@ -143,14 +145,18 @@ function evaluateQ(expr) {
   let tokens = tokenize(expr);
   let output = [], stack = [];
   const prec = {'+':1, '-':1, '*':2, '/':2, 'ⁿ√':3, '^':4, 'UNARY':5};
+
+  // --- 手順1: 逆ポーランド記法(RPN)への並べ替え ---
   for(let t of tokens) {
-    if(t.type==='NUM') evalStack.push(new Q(t.val.toString(),0,0,0));
-    else if(t.type==='VAR') {
-      if(t.val==='i') evalStack.push(new Q(0,1,0,0));
-      else if(t.val==='j') evalStack.push(new Q(0,0,1,0));
-      else if(t.val==='k') evalStack.push(new Q(0,0,0,1));
-      else if(t.val==='e') evalStack.push(new Q('e',0,0,0));
-      else if(t.val==='pi') evalStack.push(new Q('pi',0,0,0));
+    if(t.type==='NUM' || t.type==='VAR') output.push(t);
+    else if(t.type==='FN' || t.type==='UNARY' || t.type==='LPAREN') stack.push(t);
+    else if(t.type==='OP') {
+      while(stack.length && stack[stack.length-1].type!=='LPAREN') {
+        let top = stack[stack.length-1];
+        if(top.type==='FN' || top.type==='UNARY' || prec[top.val] > prec[t.val] || (prec[top.val]===prec[t.val] && t.val!=='^')) output.push(stack.pop());
+        else break;
+      }
+      stack.push(t);
     }
     else if(t.type==='RPAREN') {
       while(stack.length && stack[stack.length-1].type!=='LPAREN') output.push(stack.pop());
@@ -160,32 +166,27 @@ function evaluateQ(expr) {
   }
   while(stack.length) output.push(stack.pop());
   
+  // --- 手順2: 四元数(Qクラス)での計算実行 ---
   let evalStack = [];
   for(let t of output) {
-    if(t.type==='NUM') evalStack.push(new Q(t.val,0,0,0));
+    if(t.type==='NUM') evalStack.push(new Q(t.val.toString(), 0, 0, 0));
     else if(t.type==='VAR') {
       if(t.val==='i') evalStack.push(new Q(0,1,0,0));
       else if(t.val==='j') evalStack.push(new Q(0,0,1,0));
       else if(t.val==='k') evalStack.push(new Q(0,0,0,1));
-      else if(t.val==='e') evalStack.push(new Q(Math.E,0,0,0));
-      else if(t.val==='pi') evalStack.push(new Q(Math.PI,0,0,0));
+      else if(t.val==='e') evalStack.push(new Q('e',0,0,0));
+      else if(t.val==='pi') evalStack.push(new Q('pi',0,0,0));
     }
-    else if(t.type==='UNARY') { let a = evalStack.pop(); evalStack.push(new Q(-a.w, -a.x, -a.y, -a.z)); }
-    else if(t.type==='FN') {
-      let a = evalStack.pop();
-      if(t.val==='√') evalStack.push(a.pow(new Q(0.5)));
-      if(t.val==='∛') evalStack.push(a.pow(new Q(1/3)));
-      if(t.val==='ln') evalStack.push(a.ln());
-      if(t.val==='log_{10}') evalStack.push(a.ln().div(new Q(Math.LN10)));
+    else if(t.type==='UNARY') { 
+      let a = evalStack.pop(); 
+      evalStack.push(a.mul(new Q("-1",0,0,0))); 
     }
     else if(t.type==='OP') {
       let b = evalStack.pop(), a = evalStack.pop();
       if(t.val==='+') evalStack.push(a.add(b));
       if(t.val==='-') evalStack.push(a.sub(b));
-      if(t.val==='*') evalStack.push(a.mul(b)); // ←ココ！四元数の非可換乗算が走る！
+      if(t.val==='*') evalStack.push(a.mul(b));
       if(t.val==='/') evalStack.push(a.div(b));
-      if(t.val==='^') evalStack.push(a.pow(b));
-      if(t.val==='ⁿ√') evalStack.push(b.pow(new Q(1).div(a)));
     }
   }
   return evalStack[0];
@@ -331,15 +332,17 @@ function renderDisplay() {
   const exprWithCursor = expression.slice(0, cursorIndex) + MARKER + expression.slice(cursorIndex);
   let tex = toTeX(exprWithCursor);
 
-  // --- 修正ポイント：\kern を使ってカーソルの幅を完全に打ち消す ---
-  // 左右に -0.15em（文字サイズの15%分マイナス）の隙間を設定し、幅をゼロにします。
-  // （もし削りすぎたり足りなかったりした場合は、0.15 の数値を調整できます）
+  // カーソルを細い青棒にする
   tex = tex.replace(MARKER, '\\kern-0.15em{\\color{#007aff}{|}}\\kern-0.15em');
 
+  // レイアウトを崩さないよう、直接innerHTMLを書き換える
   display.innerHTML = `<span>$${tex}$</span>`;
 
   if (window.MathJax && window.MathJax.typesetPromise) {
-    MathJax.typesetPromise([display]).catch(err => console.log(err));
+    // 描画の順番待ちだけは行い、計算完了時のチラつきと競合しないようにする
+    mathjaxQueue = mathjaxQueue.then(() => {
+      return MathJax.typesetPromise([display]);
+    }).catch(err => console.log(err));
   }
 }
 
