@@ -271,17 +271,30 @@ function calculate() {
     }
 
   
+    // === calculate関数の中の履歴追加部分 ===
     const line = document.createElement("div");
     line.innerHTML = `$${toTeX(expr)} = ${texResult}$`;
     
+    // 【修正】追加する行も最初は透明にしておく
+    line.style.visibility = 'hidden';
+    history.appendChild(line);
+
     if (window.MathJax) {
       mathjaxQueue = mathjaxQueue.then(() => {
         return MathJax.typesetPromise([line]).then(() => {
-          history.appendChild(line);
-          history.scrollTop = history.scrollHeight; // ついでに履歴を一番下まで自動スクロール！
+          // 変換が終わったら表示し、一番下までスクロール
+          line.style.visibility = 'visible';
+          history.scrollTop = history.scrollHeight;
         });
       });
     } else {
+      line.style.visibility = 'visible';
+    }
+
+    expression = resultStr;
+    cursorIndex = expression.length;
+    renderDisplay();
+  } catch(e) {
       history.appendChild(line);
     }
 
