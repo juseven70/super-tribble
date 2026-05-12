@@ -271,17 +271,30 @@ function calculate() {
     }
 
   
+    // === calculate関数の中の履歴追加部分 ===
     const line = document.createElement("div");
     line.innerHTML = `$${toTeX(expr)} = ${texResult}$`;
     
+    // 【修正】追加する行も最初は透明にしておく
+    line.style.visibility = 'hidden';
+    history.appendChild(line);
+
     if (window.MathJax) {
       mathjaxQueue = mathjaxQueue.then(() => {
         return MathJax.typesetPromise([line]).then(() => {
-          history.appendChild(line);
-          history.scrollTop = history.scrollHeight; // ついでに履歴を一番下まで自動スクロール！
+          // 変換が終わったら表示し、一番下までスクロール
+          line.style.visibility = 'visible';
+          history.scrollTop = history.scrollHeight;
         });
       });
     } else {
+      line.style.visibility = 'visible';
+    }
+
+    expression = resultStr;
+    cursorIndex = expression.length;
+    renderDisplay();
+  } catch(e) {
       history.appendChild(line);
     }
 
@@ -320,7 +333,7 @@ function toggleSign() {
 
 
 // ==========================================
-// 画面描画（生のコードがチラ見えするのを完全に防ぐ魔法）
+// 画面描画（巨大化バグを修正 ＆ チラつき防止）
 // ==========================================
 function renderDisplay() {
   const exprWithCursor = expression.slice(0, cursorIndex) + MARKER + expression.slice(cursorIndex);
@@ -328,26 +341,28 @@ function renderDisplay() {
 
   tex = tex.replace(MARKER, '\\kern-0.15em{\\color{#007aff}{|}}\\kern-0.15em');
 
-  // MathJaxが読み込まれている場合
+  // 【修正】画面には置くが、生のコードが見えないように透明にしておく
+  display.style.visibility = 'hidden';
+  display.innerHTML = `<span>$${tex}$</span>`;
+
   if (window.MathJax && window.MathJax.typesetPromise) {
-    // 順番待ちの列に処理を追加する
     mathjaxQueue = mathjaxQueue.then(() => {
-      // 1. 画面外（裏側）で一時的な要素を作る
-      const tempNode = document.createElement('span');
-      tempNode.innerHTML = `$${tex}$`;
+      // 前の数式データをクリアしてから変換するとより安全
+      if (MathJax.typesetClear) MathJax.typesetClear([display]);
       
-      // 2. その裏側の要素に対して、MathJaxに綺麗な数式への変換を命じる
-      return MathJax.typesetPromise([tempNode]).then(() => {
-        // 3. 変換が「完全に終わったら」、表のディスプレイの中身を入れ替える！
-        display.innerHTML = '';
-        display.appendChild(tempNode);
+      return MathJax.typesetPromise([display]).then(() => {
+        // 変換が完全に終わったら、透明を解除して表示！
+        display.style.visibility = 'visible';
       });
-    }).catch(err => console.log(err));
+    }).catch(err => {
+      console.log(err);
+      display.style.visibility = 'visible';
+    });
   } else {
-    // MathJaxがエラー等で動いていない時だけ生文字を出す
-    display.innerHTML = `<span>$${tex}$</span>`;
+    display.style.visibility = 'visible';
   }
 }
+
 
 function insert(value) {
   expression = expression.slice(0, cursorIndex) + value + expression.slice(cursorIndex);
