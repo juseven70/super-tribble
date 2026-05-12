@@ -23,14 +23,14 @@ function toggleMode() {
 }
 
 // ==========================================
-// 【最終版】表示用のTeX変換（数字同士は×を表示、文字との間は隠す）
+// 【完全最終版】表示用のTeX変換（入力待ちの×は消さない！）
 // ==========================================
 function toTeX(expr) {
   if (!expr) return "";
 
   // 1. 基本記号の置換
   let tex = expr
-    .replace(/\*/g, "\\times ") // 一旦すべて \times にする
+    .replace(/\*/g, "\\times ")
     .replace(/\//g, "\\div ")
     .replace(/%/g, "\\% ")
     .replace(/pi/g, "\\pi ")
@@ -45,18 +45,17 @@ function toTeX(expr) {
            .replace(/√(-?[\d.ᴥijkπe]*)/g, "\\sqrt{$1}");
   tex = tex.replace(/\^([\d.ᴥijkπe]*)/g, "^{$1}");
   
-  // 3. 指数表記 (1.2 \times 10^{25})
+  // 3. 指数表記の変換
   tex = tex.replace(/([\d.])e\+?(-?[\dᴥ]+)/g, "$1 \\times 10^{$2}");
 
-  // 4. 【賢い掛け算の隠し判定】
-  // 数字同士 (例: 2 \times 3) は、そのまま「2 \times 3」として残す。
-  // 数字と文字の間 (例: 2 \times \pi) だけ、「2\pi」のように \times を消す。
+  // 4. 【最強の掛け算隠しロジック】
+  // ※カーソル(ᴥ)が直後にある時は「入力待ち」なので、×を絶対に消さないようにしました！
   
-  // 数字(\d) + \times + 文字やルートや括弧やカーソル([a-z\\\(ᴥ]) の時だけ \times を消去
-  tex = tex.replace(/(\d)\s*\\times\s*([a-z\\\(ᴥ])/g, "$1$2");
+  // 数字 + \times + 文字・ルート・開き括弧 の時だけ消去
+  tex = tex.replace(/(\d)\s*\\times\s*([a-z\\]|\()/g, "$1$2");
   
-  // 文字や閉じ括弧(\) + \times + 何か の時も \times を消去
-  tex = tex.replace(/([a-zᴥ\)])\s*\\times\s*([\d\\a-z\(ᴥ])/g, "$1$2");
+  // 文字・閉じ括弧 + \times + 数字・文字・ルート・開き括弧 の時だけ消去
+  tex = tex.replace(/([a-z\)])\s*\\times\s*([\d\\a-z]|\()/g, "$1$2");
 
   return tex;
 }
