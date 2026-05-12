@@ -4,6 +4,7 @@ const history = document.getElementById("history");
 let expression = "";
 let cursorIndex = 0;
 const MARKER = 'ᴥ'; // カーソル位置計算用の内部マーカー
+let mathjaxQueue = Promise.resolve();
 
 // ==========================================
 // S⇔D (小数/記号) モードの切り替え
@@ -23,38 +24,38 @@ function toggleMode() {
 }
 
 // ==========================================
-// 【完全最終版】表示用のTeX変換（入力待ちの×は消さない！）
+// 【真・完全版】表示用のTeX変換（eの暴走バグを修正！）
 // ==========================================
 function toTeX(expr) {
   if (!expr) return "";
 
-  // 1. 基本記号の置換
-  let tex = expr
-    .replace(/\*/g, "\\times ")
-    .replace(/\//g, "\\div ")
-    .replace(/%/g, "\\% ")
-    .replace(/pi/g, "\\pi ")
-    .replace(/π/g, "\\pi ")
-    .replace(/e/g, "e ")
-    .replace(/ln\(/g, "\\ln(")
-    .replace(/log_\{10\}\(/g, "\\log_{10}(");
+  let tex = expr;
 
-  // 2. ルート・累乗の変換
-  tex = tex.replace(/([\d.ᴥ]+)ⁿ√([\d.ᴥijkπe]*)/g, "\\sqrt[$1]{$2}")
-           .replace(/∛(-?[\d.ᴥijkπe]*)/g, "\\sqrt[3]{$1}")
-           .replace(/√(-?[\d.ᴥijkπe]*)/g, "\\sqrt{$1}");
-  tex = tex.replace(/\^([\d.ᴥijkπe]*)/g, "^{$1}");
-  
-  // 3. 指数表記の変換
+  // 1. まず一番最初に「指数表記 (例: 1.2e+10)」の e を安全に変換する
   tex = tex.replace(/([\d.])e\+?(-?[\dᴥ]+)/g, "$1 \\times 10^{$2}");
 
-  // 4. 【最強の掛け算隠しロジック】
-  // ※カーソル(ᴥ)が直後にある時は「入力待ち」なので、×を絶対に消さないようにしました！
+  // 2. 次に、数学の変数や関数を変換する
+  // （ここで先に e などを変換しておけば、後で作る \times の中の e が壊れません！）
+  tex = tex.replace(/pi/g, "\\pi ")
+           .replace(/π/g, "\\pi ")
+           .replace(/e/g, "e ")
+           .replace(/ln\(/g, "\\ln(")
+           .replace(/log_\{10\}\(/g, "\\log_{10}(");
+
+  // 3. その後で、計算記号をTeXの美しいコマンドに変換する
+  tex = tex.replace(/\*/g, "\\times ")
+           .replace(/\//g, "\\div ")
+           .replace(/%/g, "\\% ");
+
+  // 4. ルート・累乗の変換
+  tex = tex.replace(/([\d.ᴥ]+)ⁿ√([\d.ᴥijkπe ]*)/g, "\\sqrt[$1]{$2}")
+           .replace(/∛(-?[\d.ᴥijkπe ]*)/g, "\\sqrt[3]{$1}")
+           .replace(/√(-?[\d.ᴥijkπe ]*)/g, "\\sqrt{$1}");
+  tex = tex.replace(/\^([\d.ᴥijkπe ]*)/g, "^{$1}");
   
-  // 数字 + \times + 文字・ルート・開き括弧 の時だけ消去
+  // 5. 【掛け算記号の賢い隠しロジック】
+  // ※数字同士 (7×6) は隠さず、数字と文字 (2π) の間だけ綺麗に隠します
   tex = tex.replace(/(\d)\s*\\times\s*([a-z\\]|\()/g, "$1$2");
-  
-  // 文字・閉じ括弧 + \times + 数字・文字・ルート・開き括弧 の時だけ消去
   tex = tex.replace(/([a-z\)])\s*\\times\s*([\d\\a-z]|\()/g, "$1$2");
 
   return tex;
