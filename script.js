@@ -3,8 +3,7 @@ const history = document.getElementById("history");
 
 let expression = "";
 let cursorIndex = 0;
-const MARKER = 'ᴥ'; // カーソル位置計算用の内部マーカー
-let mathjaxQueue = Promise.resolve();
+const MARKER = 'ᴥ'; 
 
 // ==========================================
 // S⇔D (小数/記号) モードの切り替え
@@ -270,33 +269,11 @@ function calculate() {
       texResult = toTeX(resultStr);
     }
 
-  
-    // === calculate関数の中の履歴追加部分 ===
     const line = document.createElement("div");
+    // 左辺と右辺をそれぞれTeX化
     line.innerHTML = `$${toTeX(expr)} = ${texResult}$`;
-    
-    // 【修正】追加する行も最初は透明にしておく
-    line.style.visibility = 'hidden';
     history.appendChild(line);
-
-    if (window.MathJax) {
-      mathjaxQueue = mathjaxQueue.then(() => {
-        return MathJax.typesetPromise([line]).then(() => {
-          // 変換が終わったら表示し、一番下までスクロール
-          line.style.visibility = 'visible';
-          history.scrollTop = history.scrollHeight;
-        });
-      });
-    } else {
-      line.style.visibility = 'visible';
-    }
-
-    expression = resultStr;
-    cursorIndex = expression.length;
-    renderDisplay();
-  } catch(e) {
-      history.appendChild(line);
-    }
+    if (window.MathJax) MathJax.typesetPromise([line]);
 
     // 次の入力用に resultStr (2*pi形式) をセット
     expression = resultStr;
@@ -332,37 +309,22 @@ function toggleSign() {
 }
 
 
-// ==========================================
-// 画面描画（巨大化バグを修正 ＆ チラつき防止）
-// ==========================================
+// 画面描画
 function renderDisplay() {
   const exprWithCursor = expression.slice(0, cursorIndex) + MARKER + expression.slice(cursorIndex);
   let tex = toTeX(exprWithCursor);
 
+  // --- 修正ポイント：\kern を使ってカーソルの幅を完全に打ち消す ---
+  // 左右に -0.15em（文字サイズの15%分マイナス）の隙間を設定し、幅をゼロにします。
+  // （もし削りすぎたり足りなかったりした場合は、0.15 の数値を調整できます）
   tex = tex.replace(MARKER, '\\kern-0.15em{\\color{#007aff}{|}}\\kern-0.15em');
 
-  // 【修正】画面には置くが、生のコードが見えないように透明にしておく
-  display.style.visibility = 'hidden';
   display.innerHTML = `<span>$${tex}$</span>`;
 
   if (window.MathJax && window.MathJax.typesetPromise) {
-    mathjaxQueue = mathjaxQueue.then(() => {
-      // 前の数式データをクリアしてから変換するとより安全
-      if (MathJax.typesetClear) MathJax.typesetClear([display]);
-      
-      return MathJax.typesetPromise([display]).then(() => {
-        // 変換が完全に終わったら、透明を解除して表示！
-        display.style.visibility = 'visible';
-      });
-    }).catch(err => {
-      console.log(err);
-      display.style.visibility = 'visible';
-    });
-  } else {
-    display.style.visibility = 'visible';
+    MathJax.typesetPromise([display]).catch(err => console.log(err));
   }
 }
-
 
 function insert(value) {
   expression = expression.slice(0, cursorIndex) + value + expression.slice(cursorIndex);
