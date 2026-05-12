@@ -309,26 +309,6 @@ function toggleSign() {
 }
 
 
-// キーボード & かな入力対応（一番下にあるやつです。i と p を追加）
-document.addEventListener('keydown', function(e) {
-  let k = e.key;
-  k = k.replace(/[０-９．＋－＊／＝％ｉｐ]/g, s => String.fromCharCode(s.charCodeAt(0)-0xFEE0));
-  const map = {'ー':'-','−':'-','×':'*','÷':'/','。':'.','、':'.','・':'/'};
-  if (map[k]) k = map[k];
-
-  if (/^[0-9]$/.test(k)) insert(k);
-  else if (/[+\-*/^]/.test(k)) operator(k);
-  else if (k === '.') appendDot();
-  else if (k === 'Enter' || k === '=') { e.preventDefault(); calculate(); }
-  else if (k === 'Backspace') deleteOne();
-  else if (k === 'Escape') clearAll();
-  else if (k === '%') insertPercent();
-  else if (k === 'ArrowLeft') moveCursor('left');
-  else if (k === 'ArrowRight') moveCursor('right');
-  else if (k === 'i') insert('i'); // キーボードの i で虚数
-  else if (k === 'p') insert('π'); // キーボードの p で円周率
-});
-
 // 画面描画
 function renderDisplay() {
   const exprWithCursor = expression.slice(0, cursorIndex) + MARKER + expression.slice(cursorIndex);
