@@ -270,11 +270,20 @@ function calculate() {
       texResult = toTeX(resultStr);
     }
 
+  
     const line = document.createElement("div");
-    // 左辺と右辺をそれぞれTeX化
     line.innerHTML = `$${toTeX(expr)} = ${texResult}$`;
-    history.appendChild(line);
-    if (window.MathJax) MathJax.typesetPromise([line]);
+    
+    if (window.MathJax) {
+      mathjaxQueue = mathjaxQueue.then(() => {
+        return MathJax.typesetPromise([line]).then(() => {
+          history.appendChild(line);
+          history.scrollTop = history.scrollHeight; // ついでに履歴を一番下まで自動スクロール！
+        });
+      });
+    } else {
+      history.appendChild(line);
+    }
 
     // 次の入力用に resultStr (2*pi形式) をセット
     expression = resultStr;
@@ -310,20 +319,33 @@ function toggleSign() {
 }
 
 
-// 画面描画
+// ==========================================
+// 画面描画（生のコードがチラ見えするのを完全に防ぐ魔法）
+// ==========================================
 function renderDisplay() {
   const exprWithCursor = expression.slice(0, cursorIndex) + MARKER + expression.slice(cursorIndex);
   let tex = toTeX(exprWithCursor);
 
-  // --- 修正ポイント：\kern を使ってカーソルの幅を完全に打ち消す ---
-  // 左右に -0.15em（文字サイズの15%分マイナス）の隙間を設定し、幅をゼロにします。
-  // （もし削りすぎたり足りなかったりした場合は、0.15 の数値を調整できます）
   tex = tex.replace(MARKER, '\\kern-0.15em{\\color{#007aff}{|}}\\kern-0.15em');
 
-  display.innerHTML = `<span>$${tex}$</span>`;
-
+  // MathJaxが読み込まれている場合
   if (window.MathJax && window.MathJax.typesetPromise) {
-    MathJax.typesetPromise([display]).catch(err => console.log(err));
+    // 順番待ちの列に処理を追加する
+    mathjaxQueue = mathjaxQueue.then(() => {
+      // 1. 画面外（裏側）で一時的な要素を作る
+      const tempNode = document.createElement('span');
+      tempNode.innerHTML = `$${tex}$`;
+      
+      // 2. その裏側の要素に対して、MathJaxに綺麗な数式への変換を命じる
+      return MathJax.typesetPromise([tempNode]).then(() => {
+        // 3. 変換が「完全に終わったら」、表のディスプレイの中身を入れ替える！
+        display.innerHTML = '';
+        display.appendChild(tempNode);
+      });
+    }).catch(err => console.log(err));
+  } else {
+    // MathJaxがエラー等で動いていない時だけ生文字を出す
+    display.innerHTML = `<span>$${tex}$</span>`;
   }
 }
 
